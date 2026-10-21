@@ -1,0 +1,85 @@
+bundle:
+  name: "callcenter_usecase"
+
+sync:
+  include:
+    - .build
+
+artifacts:
+  default:
+    build: python3 scripts/build_databricks_app.py
+
+variables:
+  llm_endpoint_name:
+    default: databricks-gpt-5-5
+  embedding_endpoint_name:
+    default: databricks-gte-large-en
+  asr_endpoint_name:
+    default: callcenter-asr-faster-whisper
+  vector_search_endpoint_name:
+    default: carenet-vs-so
+  vector_search_index_name:
+    default: classic_stable_84t3jv_catalog.callcenter.kb_index
+  knowledge_table_name:
+    default: classic_stable_84t3jv_catalog.callcenter.knowledge_chunks
+  volume_name:
+    default: classic_stable_84t3jv_catalog.callcenter.demo_assets
+  lakebase_branch:
+    default: projects/carenet-nba/branches/production
+  lakebase_database:
+    default: projects/carenet-nba/branches/production/databases/databricks-postgres
+
+resources:
+  apps:
+    callcenter_usecase-app:
+      name: "carenet-nba"
+      description: "Carenet next-best-action call center assistant"
+      source_code_path: ./.build
+      compute_size: MEDIUM
+      lifecycle:
+        started: true
+      resources:
+        - name: postgres
+          postgres:
+            branch: ${var.lakebase_branch}
+            database: ${var.lakebase_database}
+            permission: CAN_CONNECT_AND_CREATE
+        - name: llm
+          serving_endpoint:
+            name: ${var.llm_endpoint_name}
+            permission: CAN_QUERY
+        - name: embeddings
+          serving_endpoint:
+            name: ${var.embedding_endpoint_name}
+            permission: CAN_QUERY
+        - name: asr
+          serving_endpoint:
+            name: ${var.asr_endpoint_name}
+            permission: CAN_QUERY
+        - name: knowledge-index
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.vector_search_index_name}
+            permission: SELECT
+        - name: knowledge-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.knowledge_table_name}
+            permission: SELECT
+        - name: demo-volume
+          uc_securable:
+            securable_type: VOLUME
+            securable_full_name: ${var.volume_name}
+            permission: WRITE_VOLUME
+
+targets:
+  dev:
+    mode: development
+    default: true
+    workspace:
+      host: https://fevm-classic-stable-84t3jv.cloud.databricks.com
+      profile: fevm-classic-stable
+  east-fe:
+    mode: development
+    workspace:
+      host: https://adb-984752964297111.11.azuredatabricks.net

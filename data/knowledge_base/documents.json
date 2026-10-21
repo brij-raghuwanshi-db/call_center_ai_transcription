@@ -1,0 +1,44 @@
+[
+  {
+    "document_id": "appointment_retention_playbook",
+    "title": "Appointment Retention Playbook",
+    "txt_path": "data/knowledge_base/appointment_retention_playbook.txt",
+    "pdf_path": "data/knowledge_base/appointment_retention_playbook.pdf",
+    "content": "When a patient wants to cancel, acknowledge the barrier, ask about scheduling or transportation constraints, and offer a concrete alternative before ending the call."
+  },
+  {
+    "document_id": "medication_concern_handling",
+    "title": "Medication Concern Handling",
+    "txt_path": "data/knowledge_base/medication_concern_handling.txt",
+    "pdf_path": "data/knowledge_base/medication_concern_handling.pdf",
+    "content": "If a patient reports side effects or wants to stop medication, advise them not to discontinue prescribed therapy without clinician direction and offer nurse or pharmacist escalation."
+  },
+  {
+    "document_id": "billing_confusion_deescalation",
+    "title": "Billing Confusion Deescalation",
+    "txt_path": "data/knowledge_base/billing_confusion_deescalation.txt",
+    "pdf_path": "data/knowledge_base/billing_confusion_deescalation.pdf",
+    "content": "For billing frustration, validate the concern, route billing review, and reinforce that care continuity should not pause while the billing issue is investigated."
+  },
+  {
+    "document_id": "symptom_escalation_triage",
+    "title": "Symptom Escalation Triage",
+    "txt_path": "data/knowledge_base/symptom_escalation_triage.txt",
+    "pdf_path": "data/knowledge_base/symptom_escalation_triage.pdf",
+    "content": "Chest tightness, chest pain, severe shortness of breath, fainting, or rapidly worsening symptoms require urgent escalation to nurse triage or emergency services guidance."
+  },
+  {
+    "document_id": "care_navigation_workflow",
+    "title": "Care Navigation Workflow",
+    "txt_path": "data/knowledge_base/care_navigation_workflow.txt",
+    "pdf_path": "data/knowledge_base/care_navigation_workflow.pdf",
+    "content": "For post-discharge confusion, confirm the follow-up appointment, medication questions, warning signs, and the correct contact path for symptom changes."
+  },
+  {
+    "document_id": "hipaa_safe_communication",
+    "title": "Hipaa Safe Communication",
+    "txt_path": "data/knowledge_base/hipaa_safe_communication.txt",
+    "pdf_path": "data/knowledge_base/hipaa_safe_communication.pdf",
+    "content": "Before discussing protected health details, verify identity using approved identifiers and avoid unnecessary disclosure of sensitive information."
+  }
+]

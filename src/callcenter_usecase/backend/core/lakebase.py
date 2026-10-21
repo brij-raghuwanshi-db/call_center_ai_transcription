@@ -1,0 +1,260 @@
+"""Lakebase (Databricks Database) integration: config, engine, session, and dependency."""
+
+from __future__ import annotations
+
+import os
+from collections.abc import Generator
+from contextlib import asynccontextmanager
+from typing import Annotated, Any, AsyncGenerator, TypeAlias
+from urllib.parse import urlparse
+
+from databricks.sdk import WorkspaceClient
+from databricks.sdk.errors import NotFound
+from fastapi import FastAPI, Request
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy import Engine, create_engine, event
+from sqlmodel import Session, SQLModel, text
+
+from ._base import LifespanDependency
+from ._config import logger
+
+
+# --- Database Config ---
+
+
+class DatabaseConfig(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="")
+
+    host: str | None = Field(
+        description="The PostgreSQL host injected by Databricks Apps",
+        default=None,
+        validation_alias="PGHOST",
+    )
+    port: int = Field(
+        description="The port of the database", default=5432, validation_alias="PGPORT"
+    )
+    database_name: str = Field(
+        description="The name of the database",
+        default="databricks_postgres",
+        validation_alias="PGDATABASE",
+    )
+    username: str | None = Field(
+        description="The PostgreSQL role/user injected by Databricks Apps",
+        default=None,
+        validation_alias="PGUSER",
+    )
+    app_name: str | None = Field(
+        description="The Databricks app name injected by Databricks Apps",
+        default=None,
+        validation_alias="PGAPPNAME",
+    )
+    endpoint_name: str | None = Field(
+        description="Lakebase Autoscaling endpoint path from the app postgres resource",
+        default=None,
+        validation_alias="LAKEBASE_ENDPOINT",
+    )
+    instance_name: str | None = Field(
+        description="Provisioned Lakebase database instance name",
+        default=None,
+        validation_alias="LAKEBASE_INSTANCE_NAME",
+    )
+    password: str | None = Field(
+        description="PostgreSQL password injected by Databricks Apps when present",
+        default=None,
+        validation_alias="PGPASSWORD",
+    )
+
+
+# --- Engine creation ---
+
+
+def _get_dev_db_port() -> int | None:
+    """Check for APX_DEV_DB_PORT environment variable for local development."""
+    port = os.environ.get("APX_DEV_DB_PORT")
+    return int(port) if port else None
+
+
+def _build_engine_url(
+    db_config: DatabaseConfig, ws: WorkspaceClient, dev_port: int | None
+) -> str:
+    """Build the database engine URL for dev or production mode."""
+    if dev_port:
+        logger.info(f"Using local dev database at localhost:{dev_port}")
+        username = "postgres"
+        password = os.environ.get("APX_DEV_DB_PWD")
+        if password is None:
+            raise ValueError(
+                "APX server didn't provide a password, please check the dev server logs"
+            )
+        return f"postgresql+psycopg://{username}:{password}@localhost:{dev_port}/postgres?sslmode=disable"
+
+    if db_config.host:
+        logger.info(f"Using Lakebase host injected by Databricks Apps: {db_config.host}")
+        prefix = "postgresql+psycopg"
+        username = db_config.username or ws.config.client_id or ws.current_user.me().user_name
+        return (
+            f"{prefix}://{username}:@{db_config.host}:{db_config.port}/"
+            f"{db_config.database_name}"
+        )
+
+    if db_config.endpoint_name:
+        parsed = urlparse(db_config.endpoint_name)
+        if parsed.hostname:
+            logger.info("Using Lakebase endpoint URL injected by Databricks Apps")
+            prefix = "postgresql+psycopg"
+            username = db_config.username or ws.config.client_id or ws.current_user.me().user_name
+            database = parsed.path.rstrip("/").split("/")[-1] or db_config.database_name
+            return f"{prefix}://{username}:@{parsed.hostname}:{parsed.port or db_config.port}/{database}"
+
+    if not db_config.instance_name:
+        raise ValueError(
+            "Lakebase is missing PGHOST/LAKEBASE_ENDPOINT or LAKEBASE_INSTANCE_NAME"
+        )
+
+    # Production mode: use Databricks Database
+    logger.info(f"Using Databricks database instance: {db_config.instance_name}")
+    instance = ws.database.get_database_instance(db_config.instance_name)
+    prefix = "postgresql+psycopg"
+    host = instance.read_write_dns
+    port = db_config.port
+    database = db_config.database_name
+    username = (
+        ws.config.client_id if ws.config.client_id else ws.current_user.me().user_name
+    )
+    return f"{prefix}://{username}:@{host}:{port}/{database}"
+
+
+def create_db_engine(db_config: DatabaseConfig, ws: WorkspaceClient) -> Engine:
+    """
+    Create a SQLAlchemy engine.
+
+    In dev mode: no SSL, no password callback.
+    In production: require SSL and use Databricks credential callback.
+    """
+    dev_port = _get_dev_db_port()
+    engine_url = _build_engine_url(db_config, ws, dev_port)
+
+    engine_kwargs: dict[str, Any] = {"pool_size": 4, "pool_recycle": 45 * 60}
+
+    if not dev_port:
+        engine_kwargs["connect_args"] = {"sslmode": "require"}
+
+    engine = create_engine(engine_url, **engine_kwargs)
+
+    def before_connect(dialect, conn_rec, cargs, cparams):
+        if db_config.password:
+            cparams["password"] = db_config.password
+            return
+        endpoint = db_config.endpoint_name or ""
+        if endpoint.startswith("projects/") and "/endpoints/" in endpoint:
+            cred = ws.postgres.generate_database_credential(endpoint=endpoint)
+        elif db_config.instance_name:
+            cred = ws.database.generate_database_credential(
+                instance_names=[db_config.instance_name]
+            )
+        else:
+            raise ValueError(
+                "Lakebase OAuth credential generation requires LAKEBASE_ENDPOINT "
+                "(projects/.../endpoints/...) or LAKEBASE_INSTANCE_NAME"
+            )
+        cparams["password"] = cred.token
+
+    if not dev_port:
+        event.listens_for(engine, "do_connect")(before_connect)
+
+    return engine
+
+
+def validate_db(engine: Engine, db_config: DatabaseConfig) -> None:
+    """Validate that the database connection works."""
+    dev_port = _get_dev_db_port()
+
+    if dev_port:
+        logger.info(f"Validating local dev database connection at localhost:{dev_port}")
+    elif db_config.host:
+        logger.info(
+            f"Validating Lakebase connection to {db_config.host}/{db_config.database_name}"
+        )
+    else:
+        logger.info(
+            f"Validating database connection to instance {db_config.instance_name}"
+        )
+        try:
+            ws = WorkspaceClient()
+            ws.database.get_database_instance(db_config.instance_name)
+        except NotFound:
+            raise ValueError(
+                f"Database instance {db_config.instance_name} does not exist"
+            )
+
+    try:
+        with Session(engine) as session:
+            session.connection().execute(text("SELECT 1"))
+            session.close()
+    except Exception as error:
+        raise ConnectionError(f"Failed to connect to the database: {error}") from error
+
+    if dev_port:
+        logger.info("Local dev database connection validated successfully")
+    elif db_config.host:
+        logger.info("Lakebase connection validated successfully")
+    else:
+        logger.info(
+            f"Database connection to instance {db_config.instance_name} validated successfully"
+        )
+
+
+def initialize_models(engine: Engine) -> None:
+    """Create all SQLModel tables."""
+    logger.info("Initializing database models")
+    SQLModel.metadata.create_all(engine)
+    logger.info("Database models initialized successfully")
+
+
+# --- Dependency ---
+
+
+class _LakebaseDependency(LifespanDependency):
+    @asynccontextmanager
+    async def lifespan(self, app: FastAPI) -> AsyncGenerator[None, None]:
+        if (
+            not os.environ.get("APX_DEV_DB_PORT")
+            and not os.environ.get("PGHOST")
+            and not os.environ.get("LAKEBASE_ENDPOINT")
+            and not os.environ.get("LAKEBASE_INSTANCE_NAME")
+        ):
+            logger.warning(
+                "Lakebase is not configured; running with in-memory demo state. "
+                "Add a Databricks Apps Lakebase resource or use apx dev for Lakebase/PGlite."
+            )
+            app.state.engine = None
+            yield
+            return
+
+        db_config = DatabaseConfig()  # ty: ignore[missing-argument]
+        ws = app.state.workspace_client
+
+        try:
+            engine = create_db_engine(db_config, ws)
+            validate_db(engine, db_config)
+            initialize_models(engine)
+        except Exception as error:
+            logger.warning("Lakebase initialization failed; running with in-memory demo state: %s", error)
+            app.state.engine = None
+            yield
+            return
+
+        app.state.engine = engine
+        yield
+        engine.dispose()
+
+    @staticmethod
+    def __call__(request: Request) -> Generator[Session, None, None]:
+        if request.app.state.engine is None:
+            raise RuntimeError("Lakebase is not configured for this app instance")
+        with Session(bind=request.app.state.engine) as session:
+            yield session
+
+
+LakebaseDependency: TypeAlias = Annotated[Session, _LakebaseDependency.depends()]

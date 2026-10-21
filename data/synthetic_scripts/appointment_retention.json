@@ -1,0 +1,51 @@
+{
+  "title": "Appointment Retention",
+  "patient": "Maria Johnson",
+  "intent": "appointment_retention",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Call Center, this is Ava. How can I help today?",
+      "start_ms": 800,
+      "end_ms": 5073
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "I think I need to cancel my follow-up appointment. I cannot keep missing work.",
+      "start_ms": 5558,
+      "end_ms": 10024
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I understand. Missing work is stressful. Can I ask what time windows are easiest for you?",
+      "start_ms": 10637,
+      "end_ms": 15963
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "Early morning might work, but I am not sure the appointment is even worth it.",
+      "start_ms": 16645,
+      "end_ms": 20632
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "Your follow-up helps the care team catch issues early. I can look for an earlier slot and confirm transportation options.",
+      "start_ms": 21012,
+      "end_ms": 27762
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "If you can find something before work, I would probably keep it.",
+      "start_ms": 28357,
+      "end_ms": 31883
+    }
+  ],
+  "scenario_id": "appointment_retention",
+  "audio_path": "data/generated_audio/appointment_retention.wav"
+}

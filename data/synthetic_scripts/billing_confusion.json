@@ -1,0 +1,51 @@
+{
+  "title": "Billing Confusion",
+  "patient": "Denise Walker",
+  "intent": "billing_confusion",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Call Center, this is Ava. How can I help you today?",
+      "start_ms": 800,
+      "end_ms": 4178
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "I got a bill I do not understand. If this is how it works, I am done with these visits.",
+      "start_ms": 4452,
+      "end_ms": 9685
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I hear how frustrating that is. Let us separate the billing question from the care you still need.",
+      "start_ms": 10147,
+      "end_ms": 15112
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "Nobody explained why I owe this much.",
+      "start_ms": 15394,
+      "end_ms": 17607
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "I can route the billing review and keep your care plan moving while that is checked.",
+      "start_ms": 18036,
+      "end_ms": 21851
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Okay, I just do not want to be surprised again.",
+      "start_ms": 22367,
+      "end_ms": 25494
+    }
+  ],
+  "scenario_id": "billing_confusion",
+  "audio_path": "data/generated_audio/billing_confusion.wav"
+}

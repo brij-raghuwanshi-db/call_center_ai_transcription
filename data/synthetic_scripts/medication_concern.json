@@ -1,0 +1,51 @@
+{
+  "title": "Medication Concern",
+  "patient": "Robert Ellis",
+  "intent": "medication_concern",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Call Center. What medication question can I help route today?",
+      "start_ms": 800,
+      "end_ms": 5573
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "This new medicine makes me dizzy. I am thinking about stopping it.",
+      "start_ms": 6158,
+      "end_ms": 9848
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I am sorry that is happening. Please do not stop a prescribed medication without clinical guidance.",
+      "start_ms": 10182,
+      "end_ms": 15972
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "I just feel off and I do not know if that is normal.",
+      "start_ms": 16351,
+      "end_ms": 19145
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "I can connect you with a nurse to review symptoms and next steps. Are you having trouble breathing or chest pain?",
+      "start_ms": 19424,
+      "end_ms": 25516
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "No chest pain, but I would like to talk with a nurse.",
+      "start_ms": 25913,
+      "end_ms": 28925
+    }
+  ],
+  "scenario_id": "medication_concern",
+  "audio_path": "data/generated_audio/medication_concern.wav"
+}

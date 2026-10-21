@@ -1,0 +1,36 @@
+command:
+  - python
+  - app.py
+env:
+  - name: LAKEBASE_ENDPOINT
+    value: "projects/carenet-nba/branches/production/endpoints/primary"
+  - name: CALLCENTER_USECASE_ASR_ENDPOINT_NAME
+    valueFrom: asr
+  - name: CALLCENTER_USECASE_LLM_ENDPOINT_NAME
+    valueFrom: llm
+  - name: CALLCENTER_USECASE_EMBEDDING_ENDPOINT_NAME
+    valueFrom: embeddings
+  - name: CALLCENTER_USECASE_VECTOR_SEARCH_INDEX_NAME
+    valueFrom: knowledge-index
+  - name: CALLCENTER_USECASE_VECTOR_SEARCH_ENDPOINT_NAME
+    value: "carenet-vs-so"
+  - name: CALLCENTER_USECASE_UC_CATALOG
+    value: "classic_stable_84t3jv_catalog"
+  - name: CALLCENTER_USECASE_UC_SCHEMA
+    value: "callcenter"
+  - name: CALLCENTER_USECASE_DELTA_SCHEMA_NAME
+    value: "callcenter"
+  - name: CALLCENTER_USECASE_VOLUME_NAME
+    value: "demo_assets"
+  - name: CALLCENTER_USECASE_AUDIO_VOLUME_PATH
+    value: "/Volumes/classic_stable_84t3jv_catalog/callcenter/demo_assets/callcenter_audio"
+  - name: CALLCENTER_USECASE_USE_DATABRICKS_ASR
+    value: "true"
+  - name: CALLCENTER_USECASE_USE_MOCK_ASR
+    value: "false"
+  - name: CALLCENTER_USECASE_USE_MOCK_LLM
+    value: "false"
+  - name: CALLCENTER_USECASE_USE_SCRIPTED_TRANSCRIPT_FALLBACK
+    value: "false"
+  - name: CALLCENTER_USECASE_ENABLE_ACOUSTIC_FEATURES
+    value: "true"

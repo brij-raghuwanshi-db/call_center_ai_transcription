@@ -1,0 +1,51 @@
+{
+  "title": "Symptom Escalation",
+  "patient": "James Miller",
+  "intent": "symptom_escalation",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Call Center. Tell me what is going on today.",
+      "start_ms": 800,
+      "end_ms": 4528
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "My chest feels tight and I have been short of breath since this morning.",
+      "start_ms": 5085,
+      "end_ms": 8631
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I am sorry you are feeling that. Because you mentioned chest tightness and shortness of breath, I need to escalate this right away.",
+      "start_ms": 9144,
+      "end_ms": 16211
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "I was hoping it would pass, but it is getting worse.",
+      "start_ms": 16653,
+      "end_ms": 19459
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "If symptoms are severe or worsening, please call emergency services now. I can also get a nurse on the line immediately.",
+      "start_ms": 20089,
+      "end_ms": 26982
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Please get the nurse. I am scared.",
+      "start_ms": 27249,
+      "end_ms": 29302
+    }
+  ],
+  "scenario_id": "symptom_escalation",
+  "audio_path": "data/generated_audio/symptom_escalation.wav"
+}
