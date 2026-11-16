@@ -1,23 +1,30 @@
 # Call Center Use Case
 
-Databricks-native POC for a healthcare call-center assistant. The app helps a human call center agent during a live or simulated patient call by showing a running transcript, intent, risk alerts, RAG citations, suggested response, next-best action, supervisor metrics, and feedback capture.
+Databricks-native POC for a Toyota owner-support assistant. The app helps a human Brand Engagement or roadside agent during a live or simulated owner call by showing a running transcript, intent, risk alerts, RAG citations, suggested response, next-best action, supervisor metrics, and feedback capture.
+
+The scenario catalog that this demo is based on is in `TOYOTA_CALL_CENTER_SCENARIOS.md`.
 
 ## What Is Implemented
 
 - React + FastAPI Databricks App scaffolded with `apx`.
-- Synthetic healthcare call scenarios:
-  - Appointment retention.
-  - Medication concern.
-  - Billing confusion.
-  - Symptom escalation.
-  - Care navigation.
+- Ten live Toyota call scenarios from `src/callcenter_usecase/backend/toyota_catalog.py`:
+  - Coolant overheat (owner wants to keep driving).
+  - Oil light after recent dealer service, on a highway.
+  - SOS / Automatic Collision Notification with no occupant response.
+  - Hybrid no-start (12-volt vs hybrid battery).
+  - Recall / Safety Sense drive guidance.
+  - Warranty dealer dispute and lemon-law boundary.
+  - Safety Connect trial expired / SOS dark.
+  - Accidental SOS versus Destination Assist.
+  - Post-collision Toyota Certified Collision Center routing.
+  - Service Connect dealer-contact opt-out.
 - Generated 60-second WAV files for every scenario under `data/generated_audio/`.
 - Script metadata with speaker labels under `data/synthetic_scripts/`.
-- Synthetic healthcare knowledge base in text and PDF form under `data/knowledge_base/`.
+- Toyota knowledge base covering crash, roadside, warnings, ToyotaCare, warranty, recalls, connected services, privacy, TFS transfer, collision repair, and hybrid/BEV rules under `data/knowledge_base/`.
 - FastAPI endpoints for call lifecycle, transcript, audio upload/chunks, recommendation analysis, feedback, replay, config, scenarios, knowledge documents, and demo metrics.
 - Mock ASR fallback that returns speaker-labeled scripted segments.
 - Optional Databricks Model Serving hooks for ASR and GPT reasoning when mock flags are disabled.
-- Deterministic healthcare guardrail rules for urgent symptoms, medication adherence, retention risk, and HIPAA reminders.
+- Deterministic Toyota guardrail rules for stop-driving (coolant/oil), crash/SOS, come-backs, hybrid no-start, recalls, warranty disputes, accidental SOS, Service Connect opt-out, collision-center routing, and owner-identity reminders.
 - Vector Search-style local retrieval fallback over synthetic knowledge snippets.
 - Lakebase-compatible SQLModel tables plus in-memory fallback when `PGAPPNAME`/PGlite is not configured.
 - Delta-style audit fallback as JSONL files under `data/delta_audit_mock/`.
@@ -30,7 +37,7 @@ Databricks-native POC for a healthcare call-center assistant. The app helps a hu
 React Databricks App
   -> FastAPI backend
   -> ASR Model Serving endpoint or scripted mock ASR
-  -> deterministic healthcare rules
+  -> deterministic Toyota owner-support rules
   -> Vector Search or local RAG fallback
   -> GPT 5.5 Model Serving endpoint or mock recommendation engine
   -> Unity Catalog target users.brijendra_raghuwanshi
@@ -126,10 +133,10 @@ The ASR endpoint accepts DataFrame records with `audio_base64`, `language`, `cal
 ## Demo Runbook
 
 1. Open the app.
-2. Choose `Symptom Escalation` for the highest-impact demo.
+2. Choose `Coolant Overheat` for the highest-impact demo. `Oil Light After Service` is the second headline scenario. The picker also includes SOS/ACN, hybrid no-start, recall, warranty, Safety Connect restore, accidental SOS, collision-center routing, and Service Connect opt-out.
 3. Click `Start`.
 4. Click `Start mic` and speak naturally, or upload a WAV file.
-5. Watch the real ASR transcript, alerts, citations, recommendation, and summary update.
+5. Watch the real ASR transcript, stop-driving alerts, citations, recommendation, and summary update.
 6. Click `used`, `helpful`, `wrong`, `ignored`, or `not helpful` to store feedback.
 7. Show the supervisor dashboard metrics.
 8. Stop the call.
@@ -163,4 +170,4 @@ Note: the bundle uses `scripts/build_databricks_app.py` instead of `apx build` s
 
 ## Production Gaps
 
-This is a POC. Before production, add real PHI controls, redaction, retention policies, service principal hardening, Unity Catalog permissions, audit review, real telephony integration, true diarization for mixed audio, full Model Serving deployment automation for ASR, and MLflow evaluation/tracing.
+This is a POC. Before production, add owner-PII controls, redaction, retention policies, service principal hardening, Unity Catalog permissions, audit review, real telephony integration, true diarization for mixed audio, full Model Serving deployment automation for ASR, and MLflow evaluation/tracing.

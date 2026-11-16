@@ -1,0 +1,3 @@
+BEV and PHEV Charge, Range, and Tow-to-Charger
+
+If a bZ or PHEV will not charge, collect EVSE type, public versus home, app errors, and whether the vehicle can still move. Charging-procedure exclusions exist in BEV warranty. Winter range drop can be normal; capacity loss to 70 percent of original is the usual BEV battery warranty conversation. Do not offer gasoline fuel delivery. Tow to a compatible charger on a flatbed.

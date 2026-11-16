@@ -1,3 +1,0 @@
-Medication Concern Handling
-
-If a patient reports side effects or wants to stop medication, advise them not to discontinue prescribed therapy without clinician direction and offer nurse or pharmacist escalation.

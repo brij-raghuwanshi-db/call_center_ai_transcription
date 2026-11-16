@@ -197,12 +197,18 @@ export const RiskLevel = {
 } as const;
 export type RiskLevel = typeof RiskLevel[keyof typeof RiskLevel];
 export interface Scenario {
+    catalog_ids?: string[];
+    coverage?: string;
     description: string;
     expected_risk_level: RiskLevel;
+    family?: string;
     id: string;
     intent: string;
+    location?: string;
     patient_name: string;
+    queue?: string;
     title: string;
+    vehicle?: string;
 }
 export const Speaker = {
     Agent: "Agent",
@@ -293,6 +299,64 @@ export function useProcessAudioChunk(options?: {
     return useMutation({
         mutationFn: (data)=>processAudioChunk(data),
         ...options?.mutation
+    });
+}
+export interface GetScenarioAudioParams {
+    scenario_id: string;
+}
+export const getScenarioAudio = async (params: GetScenarioAudioParams, options?: RequestInit): Promise<{
+    data: unknown;
+}> =>{
+    const res = await fetch(`/api/audio/scenario/${params.scenario_id}`, {
+        ...options,
+        method: "GET"
+    });
+    if (!res.ok) {
+        const body = await res.text();
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(body);
+        } catch  {
+            parsed = body;
+        }
+        throw new ApiError(res.status, res.statusText, parsed);
+    }
+    return {
+        data: await res.json()
+    };
+};
+export const getScenarioAudioKey = (params?: GetScenarioAudioParams)=>{
+    return [
+        "/api/audio/scenario/{scenario_id}",
+        params
+    ] as const;
+};
+export function useGetScenarioAudio<TData = {
+    data: unknown;
+}>(options: {
+    params: GetScenarioAudioParams;
+    query?: Omit<UseQueryOptions<{
+        data: unknown;
+    }, ApiError, TData>, "queryKey" | "queryFn">;
+}) {
+    return useQuery({
+        queryKey: getScenarioAudioKey(options.params),
+        queryFn: ()=>getScenarioAudio(options.params),
+        ...options?.query
+    });
+}
+export function useGetScenarioAudioSuspense<TData = {
+    data: unknown;
+}>(options: {
+    params: GetScenarioAudioParams;
+    query?: Omit<UseSuspenseQueryOptions<{
+        data: unknown;
+    }, ApiError, TData>, "queryKey" | "queryFn">;
+}) {
+    return useSuspenseQuery({
+        queryKey: getScenarioAudioKey(options.params),
+        queryFn: ()=>getScenarioAudio(options.params),
+        ...options?.query
     });
 }
 export interface UploadAudioParams {
@@ -480,6 +544,42 @@ export function useGetCallSuspense<TData = {
         queryKey: getCallKey(options.params),
         queryFn: ()=>getCall(options.params),
         ...options?.query
+    });
+}
+export interface EnableLiveMicrophoneParams {
+    call_id: string;
+}
+export const enableLiveMicrophone = async (params: EnableLiveMicrophoneParams, options?: RequestInit): Promise<{
+    data: ActiveCall;
+}> =>{
+    const res = await fetch(`/api/calls/${params.call_id}/live-microphone`, {
+        ...options,
+        method: "POST"
+    });
+    if (!res.ok) {
+        const body = await res.text();
+        let parsed: unknown;
+        try {
+            parsed = JSON.parse(body);
+        } catch  {
+            parsed = body;
+        }
+        throw new ApiError(res.status, res.statusText, parsed);
+    }
+    return {
+        data: await res.json()
+    };
+};
+export function useEnableLiveMicrophone(options?: {
+    mutation?: UseMutationOptions<{
+        data: ActiveCall;
+    }, ApiError, {
+        params: EnableLiveMicrophoneParams;
+    }>;
+}) {
+    return useMutation({
+        mutationFn: (vars)=>enableLiveMicrophone(vars.params),
+        ...options?.mutation
     });
 }
 export interface StopCallParams {

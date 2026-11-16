@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Call Center Use Case Preview</title>
+    <title>Toyota Call Center Use Case</title>
     <style>
       :root {
         color-scheme: dark;
@@ -224,9 +224,15 @@
   </head>
   <body>
     <header>
-      <div>
-        <h1>Call Center Use Case</h1>
-        <p class="sub">Databricks-native live call assistant for patient retention, triage, and next-best actions.</p>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div style="width:64px;height:64px;border-radius:999px;background:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 2px rgba(0,0,0,.18)">
+          <img src="/toyota-logo.svg" alt="Toyota" width="44" height="33" />
+        </div>
+        <div>
+          <p style="margin:0 0 2px;color:#EB0A1E;letter-spacing:.42em;font-size:11px;font-weight:700">TOYOTA</p>
+          <h1>Call Center</h1>
+          <p class="sub">Independent Toyota owner-support assistant for Brand Engagement, roadside, Safety Connect, warranty, recall, collision, and privacy calls.</p>
+        </div>
       </div>
       <div class="badges">
         <span id="stateBadge" class="badge">Ready</span>
@@ -241,14 +247,17 @@
         <div class="card">
           <header>
             <h2>Customer Profile and Summary</h2>
-            <p class="sub">Derived from live transcript and Databricks LLM analysis.</p>
+            <p class="sub">Toyota owner, vehicle, queue, and coverage for this demo call.</p>
           </header>
           <div class="body">
             <div class="profile">
-              <span class="muted">Patient</span><strong id="patient">James Miller</strong>
-              <span class="muted">Scenario</span><strong id="scenarioTitle">Symptom Escalation</strong>
-              <span class="muted">Intent</span><strong id="intent">symptom_escalation</strong>
-              <span class="muted">Risk</span><strong id="profileRisk">low</strong>
+              <span class="muted">Caller</span><strong id="patient">Maya Chen</strong>
+              <span class="muted">Scenario</span><strong id="scenarioTitle">Coolant Overheat</strong>
+              <span class="muted">Queue</span><strong id="queue">Toyota Roadside / Safety Connect</strong>
+              <span class="muted">Vehicle</span><strong id="vehicle">2023 RAV4 Hybrid, 18,400 miles</strong>
+              <span class="muted">Location</span><strong id="location">I-35, 20 minutes from a hospital appointment</strong>
+              <span class="muted">Intent</span><strong id="intent">overheat_roadside_assist</strong>
+              <span class="muted">Risk</span><strong id="profileRisk">critical</strong>
             </div>
             <div id="summary" class="note muted">Summary draft appears as the call progresses.</div>
           </div>
@@ -307,9 +316,13 @@
         <div class="card">
           <header>
             <h2>Demo Call Controls</h2>
-            <p class="sub">Use generated healthcare audio, upload a WAV, or test microphone chunks.</p>
+            <p class="sub">Ten live Toyota scenarios with matching audio, knowledge, and guardrails.</p>
           </header>
           <div class="body">
+            <label>
+              Scenario
+              <select id="scenarioSelect"></select>
+            </label>
             <div class="grid2">
               <button id="startBtn" class="primary">Start</button>
               <button id="stopBtn" disabled>Stop</button>
@@ -318,11 +331,11 @@
             <div>
               <div class="sub" style="margin-bottom:7px;font-weight:650;color:var(--text)">Current speaker</div>
               <div class="speaker-choice">
-                <button id="patientSpeakerBtn" class="selected" disabled>Patient</button>
+                <button id="patientSpeakerBtn" class="selected" disabled>Caller</button>
                 <button id="agentSpeakerBtn" disabled>Agent</button>
               </div>
             </div>
-            <div class="note muted">For the mono mic demo, choose who is speaking or start a phrase with "agent speaking" / "patient speaking".</div>
+            <div class="note muted">For the mono mic demo, choose who is speaking or start a phrase with "agent speaking" / "caller speaking".</div>
             <button id="micBtn" disabled>Start mic</button>
             <label>
               Upload WAV
@@ -388,87 +401,149 @@
 
     <script>
       const scenarioDetails = {
-        symptom_escalation: {
-          note: "Patient describes worsening symptoms and needs triage escalation.",
-          patient: "James Miller",
-          title: "Symptom Escalation",
-          intent: "symptom_escalation",
-          risk: "high",
-          lines: [
-            ["Agent", "Thank you for calling Call Center. Tell me what is going on today."],
-            ["Patient", "My chest feels tight and I have been short of breath since this morning."],
-            ["Agent", "I am sorry you are feeling that. Because you mentioned chest tightness and shortness of breath, I need to escalate this right away."],
-            ["Patient", "I was hoping it would pass, but it is getting worse."],
-            ["Agent", "If symptoms are severe or worsening, please call emergency services now. I can also get a nurse on the line immediately."],
-            ["Patient", "Please get the nurse. I am scared."]
-          ],
-          action: "Escalate to nurse triage now and advise emergency services if symptoms are severe or worsening.",
-          response: "Because you mentioned chest tightness and shortness of breath, I want to get you clinical help immediately.",
-          citation: "Chest tightness, chest pain, severe shortness of breath, fainting, or rapidly worsening symptoms require urgent escalation."
+        coolant_overheat: {
+          note: "Owner sees a high-temperature caution, still needs to reach a destination, and wants the nearest service center.",
+          patient: "Maya Chen",
+          title: "Coolant Overheat",
+          intent: "overheat_roadside_assist",
+          risk: "critical",
+          family: "Roadside & warning lights",
+          queue: "Toyota Roadside / Safety Connect",
+          vehicle: "2023 RAV4 Hybrid, 18,400 miles",
+          location: "I-35, 20 minutes from a hospital appointment",
+          action: "Stop driving, dispatch Toyota roadside or SOS, and tow to the nearest authorized Toyota dealer.",
+          response: "I do not want you to keep driving on that temperature warning. Pull over somewhere safe, turn the engine off, and I will send a tow to the nearest Toyota dealer.",
+          citation: "A high coolant temperature warning means stop immediately. Do not keep driving to an appointment."
         },
-        appointment_retention: {
-          note: "Patient wants to cancel or skip an appointment.",
-          patient: "Maria Johnson",
-          title: "Appointment Retention",
-          intent: "appointment_retention",
-          risk: "medium",
-          lines: [
-            ["Agent", "Thank you for calling Call Center, this is Ava. How can I help today?"],
-            ["Patient", "I think I need to cancel my follow-up appointment. I cannot keep missing work."],
-            ["Agent", "I understand. Missing work is stressful. Can I ask what time windows are easiest for you?"]
-          ],
-          action: "Ask for acceptable time windows and offer an alternate appointment.",
-          response: "I understand work makes this hard. Let us find a time that protects your follow-up and fits your schedule.",
-          citation: "When a patient wants to cancel, acknowledge the barrier and offer a concrete alternative."
+        oil_light_comeback: {
+          note: "Engine and oil lights return after a dealer oil change while the owner is already on a highway.",
+          patient: "James Patel",
+          title: "Oil Light After Service",
+          intent: "oil_pressure_highway_comeback",
+          risk: "critical",
+          family: "Roadside & warning lights",
+          queue: "Toyota Roadside, then servicing dealer + BEC",
+          vehicle: "2022 Camry, 27,900 miles",
+          location: "I-80 live lanes after yesterday's dealer oil change",
+          action: "Get the owner off the highway, kill the engine, and tow to the servicing Toyota dealer as a come-back.",
+          response: "The oil light is the urgent one. Get out of the live lanes, shut the engine off, and I will tow you to the Toyota dealer that just did the oil change.",
+          citation: "A red oil-pressure light means stop immediately. After recent maintenance, tow to the servicing Toyota dealer."
         },
-        medication_concern: {
-          note: "Patient is worried about side effects and may stop medication.",
-          patient: "Robert Ellis",
-          title: "Medication Concern",
-          intent: "medication_concern",
-          risk: "medium",
-          lines: [
-            ["Agent", "Thank you for calling Call Center. What medication question can I help route today?"],
-            ["Patient", "This new medicine makes me dizzy. I am thinking about stopping it."],
-            ["Agent", "Please do not stop a prescribed medication without clinical guidance."]
-          ],
-          action: "Offer nurse or pharmacist escalation and ask about severe symptoms.",
-          response: "I am sorry you are feeling dizzy. Please do not stop the medication until a clinician reviews this with you.",
-          citation: "If a patient reports side effects or wants to stop medication, offer nurse or pharmacist escalation."
+        sos_acn_no_response: {
+          note: "Automatic Collision Notification connects with no occupant response, then a weak injury report.",
+          patient: "Priya Nair",
+          title: "SOS Collision, No Response",
+          intent: "acn_emergency_dispatch",
+          risk: "critical",
+          family: "Life-safety & crash",
+          queue: "Safety Connect Response Center + 911",
+          vehicle: "2024 Highlander, Safety Connect active",
+          location: "GPS from Automatic Collision Notification",
+          action: "Dispatch 911 to the Safety Connect GPS, stay on the line, and arrange a tow only after occupants are accounted for.",
+          response: "I am sending emergency services to the vehicle GPS now. Stay in the car unless there is fire, and stay on the line with me.",
+          citation: "Automatic Collision Notification with no occupant response is an emergency until proven otherwise."
         },
-        billing_confusion: {
-          note: "Patient is frustrated about a bill and may disengage.",
-          patient: "Denise Walker",
-          title: "Billing Confusion",
-          intent: "billing_confusion",
-          risk: "low",
-          lines: [
-            ["Agent", "Call Center, this is Ava. How can I help you today?"],
-            ["Patient", "I got a bill I do not understand. If this is how it works, I am done with these visits."],
-            ["Agent", "I hear how frustrating that is. Let us separate the billing question from the care you still need."]
-          ],
-          action: "Create a billing review handoff and restate the next care step.",
-          response: "I hear how frustrating this bill is. Let me help route the billing review while we keep your care plan moving.",
-          citation: "Validate the concern, route billing review, and reinforce care continuity."
-        },
-        care_navigation: {
-          note: "Patient is unsure what to do after discharge.",
+        hybrid_12v_nostart: {
+          note: "Owner thinks the hybrid battery is dead; the likely issue is a 12-volt no-start.",
           patient: "Linda Chen",
-          title: "Care Navigation",
-          intent: "care_navigation",
+          title: "Hybrid No-Start",
+          intent: "hybrid_12v_roadside",
+          risk: "high",
+          family: "Roadside & warning lights",
+          queue: "Toyota Roadside",
+          vehicle: "2023 RAV4 Hybrid",
+          location: "Parking garage, vehicle silent",
+          action: "Dispatch a jump-start and use a flatbed if READY will not return.",
+          response: "A silent hybrid with dim lights is often the small 12-volt battery, not the hybrid pack. I can send a jump-start.",
+          citation: "A hybrid that will not show READY is often a discharged 12-volt battery. Use a flatbed if it still will not start."
+        },
+        recall_drive_guidance: {
+          note: "Owner received a safety-recall letter and needs VIN-specific drive or stop-sale guidance.",
+          patient: "Robert Ellis",
+          title: "Recall Drive Guidance",
+          intent: "recall_campaign_guidance",
+          risk: "high",
+          family: "Warranty, recall & disputes",
+          queue: "Brand Engagement Center, then dealer campaign",
+          vehicle: "2021 RAV4, Toyota Safety Sense message on screen",
+          location: "Home driveway, commuting question",
+          action: "Look up the VIN campaign and give drive or stop-sale guidance.",
+          response: "Let me check the VIN for open campaigns and tell you whether you can drive to a Toyota dealer or need a tow.",
+          citation: "Safety recalls are free. VIN lookup determines whether the owner may drive or must stop."
+        },
+        warranty_dealer_dispute: {
+          note: "Dealer denied a powertrain repair and the owner wants Toyota to step in.",
+          patient: "Denise Walker",
+          title: "Warranty Dealer Dispute",
+          intent: "warranty_bec_liaison",
+          risk: "medium",
+          family: "Warranty, recall & disputes",
+          queue: "Brand Engagement Center",
+          vehicle: "2022 Camry, 28,000 miles, transmission concern",
+          location: "At home after a denied dealer repair",
+          action: "Open a Brand Engagement case and stay the liaison between the owner and the dealership. Do not quote a lemon-law outcome.",
+          response: "I can open a Toyota case with your VIN, mileage, and dealer name and work this with the store.",
+          citation: "If a dealer cannot resolve a warranty concern, Brand Engagement opens a case with VIN, mileage, and dealer name."
+        },
+        safety_connect_expired: {
+          note: "SOS lights are off after the trial expired and the owner thinks emergency help is gone.",
+          patient: "Chris Alvarez",
+          title: "Safety Connect Trial Expired",
+          intent: "safety_connect_restore",
+          risk: "medium",
+          family: "Connected services & privacy",
+          queue: "Brand Engagement Center connected-services",
+          vehicle: "2023 Corolla, SOS lights off",
+          location: "At home, worried about tonight's highway trip",
+          action: "Re-enroll Safety Connect and explain that phone/app roadside still works while SOS GPS is inactive.",
+          response: "Both SOS lights off usually means the trial expired. I can restore Safety Connect in the app, and you can still call roadside at 1-800-444-4195 tonight.",
+          citation: "Both lights off usually means the trial or subscription is inactive. Roadside still works by phone or app."
+        },
+        accidental_sos_dest_assist: {
+          note: "Owner pressed SOS by mistake and wants a restaurant sent to navigation.",
+          patient: "Hannah Brooks",
+          title: "Accidental SOS vs Destination Assist",
+          intent: "accidental_sos_reroute",
           risk: "low",
-          lines: [
-            ["Agent", "Call Center, this is Ava. What can I help with?"],
-            ["Patient", "I was discharged yesterday and I do not know who I am supposed to call next."],
-            ["Agent", "I can help organize the next step. Do you have your discharge paperwork nearby?"]
-          ],
-          action: "Confirm follow-up appointment, medication questions, warning signs, and contact path.",
-          response: "Let us walk through the next step together so you know exactly who to call and what to watch for.",
-          citation: "For post-discharge confusion, confirm follow-up, medication questions, warning signs, and contact path."
+          family: "Life-safety & crash",
+          queue: "Safety Connect, then Destination Assist",
+          vehicle: "2024 Grand Highlander, Drive Connect trial active",
+          location: "Parked in a shopping-center lot, occupants answering",
+          action: "Confirm no emergency, close the SOS event, and transfer to Destination Assist or coach the nav voice command.",
+          response: "I am glad you are safe. SOS is for emergencies, so I will transfer you to Destination Assist instead of sending a restaurant on this line.",
+          citation: "Destination Assist, restaurants, and navigation POIs do not belong on SOS."
+        },
+        post_collision_tccc: {
+          note: "After a crash, the owner is being steered to an insurer shop and wants to know where to take the vehicle.",
+          patient: "Marcus Hale",
+          title: "Post-Collision Repair Guidance",
+          intent: "collision_tccc_guidance",
+          risk: "high",
+          family: "Collision repair",
+          queue: "Brand Engagement Center + Toyota Certified Collision Center locator",
+          vehicle: "2022 Camry, bumper and windshield damage",
+          location: "At home the day after a crash; vehicle drivable",
+          action: "Locate a Toyota Certified Collision Center, document Genuine parts and ADAS recalibration, and do not tell the owner they must use the insurer shop.",
+          response: "You can choose a Toyota Certified Collision Center. I will locate one and note Genuine parts and Safety Sense calibration.",
+          citation: "The owner generally chooses the repair facility. TCCC processes matter for Genuine parts and ADAS calibration."
+        },
+        service_connect_optout: {
+          note: "Dealer keeps calling from a Service Connect alert and the owner wants contact and tracking stopped.",
+          patient: "Elena Rossi",
+          title: "Service Connect Dealer Opt-Out",
+          intent: "service_connect_privacy_optout",
+          risk: "medium",
+          family: "Connected services & privacy",
+          queue: "Brand Engagement Center privacy / connected services",
+          vehicle: "2023 Highlander enrolled in Service Connect",
+          location: "At home, receiving repeated dealer calls and texts",
+          action: "Process Service Connect dealer-contact opt-out and explain connected-services data uses without over-promising a total tracking blackout.",
+          response: "I can stop the dealer Service Connect calls today and walk you through the privacy opt-out.",
+          citation: "Dealer contact from Service Connect is opt-in and can be stopped in the Toyota app or by Brand Engagement."
         }
       };
 
-      const DEFAULT_SCENARIO_ID = "symptom_escalation";
+      const DEFAULT_SCENARIO_ID = "coolant_overheat";
       let active = false;
       let activeCall = null;
       let latestRecommendation = null;
@@ -513,7 +588,7 @@
       let summaryWindowSegments = [];
 
       const el = (id) => document.getElementById(id);
-      const selected = () => scenarioDetails[activeCall?.scenario_id || DEFAULT_SCENARIO_ID] || scenarioDetails.symptom_escalation;
+      const selected = () => scenarioDetails[activeCall?.scenario_id || el("scenarioSelect")?.value || DEFAULT_SCENARIO_ID] || scenarioDetails.coolant_overheat;
 
       function html(value) {
         return String(value ?? "")
@@ -903,6 +978,7 @@
         el("stateBadge").className = isActive ? "badge live" : "badge";
         el("stateBadge").textContent = isActive ? "Call active" : "Ready";
         el("startBtn").disabled = isActive;
+        el("scenarioSelect").disabled = isActive;
         el("stopBtn").disabled = !isActive;
         el("resetBtn").disabled = isActive || !activeCall;
         el("micBtn").disabled = !isActive;
@@ -928,11 +1004,43 @@
         el("agentSpeakerBtn").classList.toggle("selected", speaker === "Agent");
       }
 
+      function populateScenarioSelect(ids) {
+        const select = el("scenarioSelect");
+        const current = select.value || DEFAULT_SCENARIO_ID;
+        select.innerHTML = "";
+        const orderedIds = ids && ids.length ? ids : Object.keys(scenarioDetails);
+        const families = [];
+        orderedIds.forEach((id) => {
+          const family = (scenarioDetails[id] && scenarioDetails[id].family) || "Toyota owner support";
+          if (!families.includes(family)) families.push(family);
+        });
+        families.forEach((family) => {
+          const group = document.createElement("optgroup");
+          group.label = family;
+          orderedIds.forEach((id) => {
+            const detail = scenarioDetails[id];
+            if (!detail || (detail.family || "Toyota owner support") !== family) return;
+            const option = document.createElement("option");
+            option.value = id;
+            option.textContent = detail.title;
+            group.appendChild(option);
+          });
+          if (group.children.length) select.appendChild(group);
+        });
+        select.value = scenarioDetails[current] ? current : DEFAULT_SCENARIO_ID;
+      }
+
       function setScenario() {
         const s = selected();
         el("patient").textContent = s.patient;
         el("scenarioTitle").textContent = s.title;
+        el("queue").textContent = s.queue || "Toyota Brand Engagement Center";
+        el("vehicle").textContent = s.vehicle || "VIN lookup pending";
+        el("location").textContent = s.location || "Unknown";
         el("intent").textContent = s.intent;
+        el("riskBadge").className = badgeClass(s.risk);
+        el("riskBadge").textContent = s.risk;
+        el("profileRisk").textContent = s.risk;
       }
 
       function badgeClass(risk) {
@@ -943,6 +1051,9 @@
         const s = scenarioDetails[call.scenario_id] || selected();
         el("patient").textContent = call.patient_name || s.patient;
         el("scenarioTitle").textContent = call.scenario_title || s.title;
+        el("queue").textContent = s.queue || "Toyota Brand Engagement Center";
+        el("vehicle").textContent = s.vehicle || "VIN lookup pending";
+        el("location").textContent = s.location || "Unknown";
         el("intent").textContent = call.latest_intent || s.intent;
         el("summary").textContent = call.summary_draft || `${call.scenario_title || s.title} call started for ${call.patient_name || s.patient}.`;
         el("riskBadge").className = badgeClass(call.current_risk_level || s.risk);
@@ -961,7 +1072,7 @@
         card.className = "transcript";
         card.innerHTML = `
           <div class="transcript-head">
-            <span class="speaker ${segment.speaker === "Patient" ? "patient" : ""}">${html(segment.speaker)}</span>
+            <span class="speaker ${segment.speaker === "Patient" || segment.speaker === "Caller" ? "patient" : ""}">${html(segment.speaker === "Patient" ? "Caller" : segment.speaker)}</span>
             <span class="meta">${html(metaText)}</span>
           </div>
           <p></p>
@@ -1148,7 +1259,7 @@
           const result = await api("/api/calls/start", {
             method: "POST",
             body: {
-              scenario_id: DEFAULT_SCENARIO_ID,
+              scenario_id: el("scenarioSelect").value || DEFAULT_SCENARIO_ID,
               settings: {
                 auto_recommendations_enabled: true,
                 cadence_mode: "every_few_seconds",
@@ -1206,7 +1317,7 @@
         el("riskBadge").textContent = s.risk;
         setControls(false);
         if (updateStatus) {
-          setStatus("UI reset. Ready to start a new patient call.");
+          setStatus("UI reset. Ready to start a new Toyota owner call.");
         }
       }
 
@@ -1637,12 +1748,19 @@
               title: s.title,
               intent: s.intent,
               risk: s.expected_risk_level,
+              family: s.family,
+              queue: s.queue,
+              vehicle: s.vehicle,
+              location: s.location,
+              coverage: s.coverage,
             };
           });
+          populateScenarioSelect(scenarios.map(s => s.id));
           await clearOrphanedDemoCalls();
           await refreshMetrics();
           setScenario();
         } catch (error) {
+          populateScenarioSelect(Object.keys(scenarioDetails));
           setStatus(`Loaded fallback scenario list; API init failed: ${error.message}`, true);
           setScenario();
         }
@@ -1655,6 +1773,9 @@
       el("patientSpeakerBtn").addEventListener("click", () => void setCurrentSpeaker("Patient"));
       el("agentSpeakerBtn").addEventListener("click", () => void setCurrentSpeaker("Agent"));
       el("upload").addEventListener("change", uploadAudio);
+      el("scenarioSelect").addEventListener("change", () => {
+        if (!active) setScenario();
+      });
       initialize();
     </script>
   </body>

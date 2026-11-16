@@ -17,23 +17,39 @@ variables:
   asr_endpoint_name:
     default: callcenter-asr-faster-whisper
   vector_search_endpoint_name:
-    default: carenet-vs-so
+    default: toyota-cc-vs
   vector_search_index_name:
-    default: classic_stable_84t3jv_catalog.callcenter.kb_index
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.kb_index
   knowledge_table_name:
-    default: classic_stable_84t3jv_catalog.callcenter.knowledge_chunks
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.knowledge_chunks
   volume_name:
-    default: classic_stable_84t3jv_catalog.callcenter.demo_assets
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.demo_assets
   lakebase_branch:
-    default: projects/carenet-nba/branches/production
+    default: projects/toyota-call-center/branches/production
   lakebase_database:
-    default: projects/carenet-nba/branches/production/databases/databricks-postgres
+    default: projects/toyota-call-center/branches/production/databases/databricks-postgres
+  genie_space_id:
+    default: 01f1cd73a77c1162b80b4a86b2b72390
+  genie_space_name:
+    default: Toyota Call Center
+  warehouse_id:
+    default: c22b90f5361e6720
+  calls_table_name:
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.calls
+  transcript_table_name:
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.transcript_segments
+  nba_table_name:
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.next_best_actions
+  feedback_table_name:
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.agent_feedback
+  closures_table_name:
+    default: classic_stable_84t3jv_catalog.toyota_callcenter.call_closures
 
 resources:
   apps:
     callcenter_usecase-app:
-      name: "carenet-nba"
-      description: "Carenet next-best-action call center assistant"
+      name: "toyota-call-center"
+      description: "Independent Toyota owner-support call assistant"
       source_code_path: ./.build
       compute_size: MEDIUM
       lifecycle:
@@ -71,6 +87,40 @@ resources:
             securable_type: VOLUME
             securable_full_name: ${var.volume_name}
             permission: WRITE_VOLUME
+        - name: sql-warehouse
+          sql_warehouse:
+            id: ${var.warehouse_id}
+            permission: CAN_USE
+        - name: genie-space
+          genie_space:
+            name: ${var.genie_space_name}
+            space_id: ${var.genie_space_id}
+            permission: CAN_RUN
+        - name: calls-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.calls_table_name}
+            permission: MODIFY
+        - name: transcript-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.transcript_table_name}
+            permission: MODIFY
+        - name: nba-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.nba_table_name}
+            permission: MODIFY
+        - name: feedback-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.feedback_table_name}
+            permission: MODIFY
+        - name: closures-table
+          uc_securable:
+            securable_type: TABLE
+            securable_full_name: ${var.closures_table_name}
+            permission: MODIFY
 
 targets:
   dev:

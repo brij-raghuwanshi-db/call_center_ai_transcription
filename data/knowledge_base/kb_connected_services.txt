@@ -1,0 +1,3 @@
+Safety, Service, Remote, and Drive Connect
+
+Safety Connect is SOS, Automatic Collision Notification, stolen-vehicle locator, and enhanced roadside. Green SOS light means active; red except startup flash is hardware; both off is inactive trial or subscription. Service Connect sends vehicle health and warning-light alerts; dealer contact is opt-in. Remote Connect is lock, start, and locate. Drive Connect includes Destination Assist. Restore or cancel in the Toyota app Shop, Manage Subscriptions.

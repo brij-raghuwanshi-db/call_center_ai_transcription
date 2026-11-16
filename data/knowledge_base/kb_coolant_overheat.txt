@@ -1,0 +1,3 @@
+High Coolant Temperature Stop-Driving Playbook
+
+A high coolant temperature warning means the engine is overheating. Immediately stop in a safe place, shut the engine off, and do not keep driving to an appointment. Do not open a hot radiator or reservoir cap. Dispatch Toyota roadside or Safety Connect enhanced roadside and tow to the nearest authorized Toyota dealer.

@@ -1,0 +1,61 @@
+{
+  "title": "Recall Drive Guidance",
+  "patient": "Robert Ellis",
+  "intent": "recall_campaign_guidance",
+  "family": "Warranty, recall & disputes",
+  "catalog_ids": [
+    "K1",
+    "K3",
+    "K4"
+  ],
+  "queue": "Brand Engagement Center, then dealer campaign",
+  "vehicle": "2021 RAV4, Toyota Safety Sense message on screen",
+  "location": "Home driveway, commuting question",
+  "coverage": "Open safety recall / service campaign pending VIN lookup",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Toyota. I can help with recalls and campaigns.",
+      "start_ms": 800,
+      "end_ms": 4818
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "I got a letter about a safety recall. Can I still drive the car to work, or do I need to stop?",
+      "start_ms": 5412,
+      "end_ms": 11062
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "Let me check your VIN for open campaigns and the exact drive guidance. Do you have the VIN handy?",
+      "start_ms": 11713,
+      "end_ms": 17348
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "Yes. There is also a Toyota Safety Sense message on the screen.",
+      "start_ms": 17817,
+      "end_ms": 21781
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "If this campaign is not a stop-sale, you can drive to a Toyota dealer for the free repair. If it is a do-not-drive bulletin, we will arrange a tow and a loaner.",
+      "start_ms": 22298,
+      "end_ms": 31142
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Please tell me which one it is and help me get to a dealer.",
+      "start_ms": 31619,
+      "end_ms": 34450
+    }
+  ],
+  "scenario_id": "recall_drive_guidance",
+  "audio_path": "data/generated_audio/recall_drive_guidance.wav"
+}

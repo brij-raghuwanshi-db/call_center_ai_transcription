@@ -1,44 +1,393 @@
 [
   {
-    "document_id": "appointment_retention_playbook",
-    "title": "Appointment Retention Playbook",
-    "txt_path": "data/knowledge_base/appointment_retention_playbook.txt",
-    "pdf_path": "data/knowledge_base/appointment_retention_playbook.pdf",
-    "content": "When a patient wants to cancel, acknowledge the barrier, ask about scheduling or transportation constraints, and offer a concrete alternative before ending the call."
+    "document_id": "kb_coolant_overheat",
+    "title": "High Coolant Temperature Stop-Driving Playbook",
+    "section": "Red temperature warning",
+    "tags": [
+      "coolant",
+      "temperature",
+      "overheat",
+      "overheating",
+      "highway",
+      "tow",
+      "roadside",
+      "engine",
+      "steam",
+      "blow"
+    ],
+    "txt_path": "data/knowledge_base/kb_coolant_overheat.txt",
+    "pdf_path": "data/knowledge_base/kb_coolant_overheat.pdf",
+    "content": "A high coolant temperature warning means the engine is overheating. Immediately stop in a safe place, shut the engine off, and do not keep driving to an appointment. Do not open a hot radiator or reservoir cap. Dispatch Toyota roadside or Safety Connect enhanced roadside and tow to the nearest authorized Toyota dealer."
   },
   {
-    "document_id": "medication_concern_handling",
-    "title": "Medication Concern Handling",
-    "txt_path": "data/knowledge_base/medication_concern_handling.txt",
-    "pdf_path": "data/knowledge_base/medication_concern_handling.pdf",
-    "content": "If a patient reports side effects or wants to stop medication, advise them not to discontinue prescribed therapy without clinician direction and offer nurse or pharmacist escalation."
+    "document_id": "kb_oil_pressure_comeback",
+    "title": "Oil Pressure and Post-Service Come-Back Playbook",
+    "section": "Oil light plus check engine after maintenance",
+    "tags": [
+      "oil",
+      "pressure",
+      "engine",
+      "light",
+      "maintenance",
+      "dealership",
+      "highway",
+      "filter",
+      "drain",
+      "comeback"
+    ],
+    "txt_path": "data/knowledge_base/kb_oil_pressure_comeback.txt",
+    "pdf_path": "data/knowledge_base/kb_oil_pressure_comeback.pdf",
+    "content": "A red oil-pressure light means stop immediately and shut the engine off. Driving with low oil pressure can destroy the engine. If the oil light appears after a recent oil change, treat it as a dealer come-back: tow to the servicing Toyota dealer to inspect oil level, drain plug, filter, and specification. Do not send the owner to an independent service center while the oil light is red."
   },
   {
-    "document_id": "billing_confusion_deescalation",
-    "title": "Billing Confusion Deescalation",
-    "txt_path": "data/knowledge_base/billing_confusion_deescalation.txt",
-    "pdf_path": "data/knowledge_base/billing_confusion_deescalation.pdf",
-    "content": "For billing frustration, validate the concern, route billing review, and reinforce that care continuity should not pause while the billing issue is investigated."
+    "document_id": "kb_dashboard_warnings",
+    "title": "Dashboard Warning Color and Drive-or-Stop Guide",
+    "section": "Red versus amber lights",
+    "tags": [
+      "warning",
+      "light",
+      "brake",
+      "abs",
+      "eps",
+      "battery",
+      "flashing",
+      "check",
+      "engine",
+      "tpms",
+      "wrench"
+    ],
+    "txt_path": "data/knowledge_base/kb_dashboard_warnings.txt",
+    "pdf_path": "data/knowledge_base/kb_dashboard_warnings.pdf",
+    "content": "Red coolant, oil pressure, brake (not parking brake), battery/charging, and EPS warnings mean stop safely now. A flashing check-engine light is urgent even though the lamp is amber. A steady check-engine or TPMS light is drive-cautiously-to-dealer, not a red-light stop. A maintenance wrench is an interval reminder, not an oil-pressure emergency. Always read the multi-information display text."
   },
   {
-    "document_id": "symptom_escalation_triage",
-    "title": "Symptom Escalation Triage",
-    "txt_path": "data/knowledge_base/symptom_escalation_triage.txt",
-    "pdf_path": "data/knowledge_base/symptom_escalation_triage.pdf",
-    "content": "Chest tightness, chest pain, severe shortness of breath, fainting, or rapidly worsening symptoms require urgent escalation to nurse triage or emergency services guidance."
+    "document_id": "kb_roadside_routing",
+    "title": "Toyota Roadside and Brand Engagement Routing",
+    "section": "Who to call",
+    "tags": [
+      "roadside",
+      "sos",
+      "safety",
+      "connect",
+      "brand",
+      "engagement",
+      "dispatch",
+      "tow",
+      "jump",
+      "destination"
+    ],
+    "txt_path": "data/knowledge_base/kb_roadside_routing.txt",
+    "pdf_path": "data/knowledge_base/kb_roadside_routing.pdf",
+    "content": "Immobilized, overheating, or red-light highway calls go to Toyota Roadside at 1-800-444-4195, the Toyota app 24/7 button, or the in-vehicle SOS button for Safety Connect. Warranty, dealer disputes, and recalls go to the Brand Engagement Center at 1-800-331-4331 after the vehicle is safe. Destination Assist is not the SOS button. TFS loans and leases go to 1-800-874-8822."
   },
   {
-    "document_id": "care_navigation_workflow",
-    "title": "Care Navigation Workflow",
-    "txt_path": "data/knowledge_base/care_navigation_workflow.txt",
-    "pdf_path": "data/knowledge_base/care_navigation_workflow.pdf",
-    "content": "For post-discharge confusion, confirm the follow-up appointment, medication questions, warning signs, and the correct contact path for symptom changes."
+    "document_id": "kb_crash_sos_acn",
+    "title": "Safety Connect Crash and No-Response Protocol",
+    "section": "Automatic Collision Notification and SOS",
+    "tags": [
+      "collision",
+      "notification",
+      "airbag",
+      "occupant",
+      "response",
+      "ambulance",
+      "gps",
+      "sos",
+      "emergency",
+      "911"
+    ],
+    "txt_path": "data/knowledge_base/kb_crash_sos_acn.txt",
+    "pdf_path": "data/knowledge_base/kb_crash_sos_acn.pdf",
+    "content": "Automatic Collision Notification or an SOS press with no occupant response is an emergency. Request local police, fire, or EMS to the vehicle GPS. Stay on the line. Optional emergency-contact notification if on file. Do not wait to confirm injury before dispatching when occupants cannot speak. Hybrid and BEV crash response must mention high-voltage isolation for first responders."
   },
   {
-    "document_id": "hipaa_safe_communication",
-    "title": "Hipaa Safe Communication",
-    "txt_path": "data/knowledge_base/hipaa_safe_communication.txt",
-    "pdf_path": "data/knowledge_base/hipaa_safe_communication.pdf",
-    "content": "Before discussing protected health details, verify identity using approved identifiers and avoid unnecessary disclosure of sensitive information."
+    "document_id": "kb_fire_hybrid_hv",
+    "title": "Fire, Smoke, and High-Voltage First-Responder Caution",
+    "section": "Occupant evacuation",
+    "tags": [
+      "fire",
+      "smoke",
+      "fuel",
+      "leak",
+      "hybrid",
+      "high-voltage",
+      "battery",
+      "evacuate"
+    ],
+    "txt_path": "data/knowledge_base/kb_fire_hybrid_hv.txt",
+    "pdf_path": "data/knowledge_base/kb_fire_hybrid_hv.pdf",
+    "content": "If there is fire, smoke from the engine or hybrid battery, or a fuel leak, get occupants out and away from the vehicle and request fire dispatch. Tell first responders it may be a high-voltage hybrid or BEV. Do not open a hot hood. Do not attempt a jump-start on a vehicle that is smoking."
+  },
+  {
+    "document_id": "kb_accidental_sos",
+    "title": "Accidental SOS Versus Destination Assist",
+    "section": "Emergency line hygiene",
+    "tags": [
+      "accidental",
+      "sos",
+      "destination",
+      "assist",
+      "restaurant",
+      "navigation",
+      "concierge",
+      "transfer"
+    ],
+    "txt_path": "data/knowledge_base/kb_accidental_sos.txt",
+    "pdf_path": "data/knowledge_base/kb_accidental_sos.pdf",
+    "content": "If the occupant answers and there is no injury, crash, or immobilization, confirm safety and close the SOS emergency event. Destination Assist, restaurants, and navigation POIs do not belong on SOS. Transfer to Destination Assist or coach the owner to say Call Destination Assist from the nav menu. No verbal response still means dispatch help."
+  },
+  {
+    "document_id": "kb_dealer_vs_independent",
+    "title": "Dealer Versus Independent Shop Guidance",
+    "section": "Warranty and ToyotaCare repairs",
+    "tags": [
+      "dealer",
+      "dealership",
+      "service",
+      "center",
+      "independent",
+      "warranty",
+      "toyotacare",
+      "genuine"
+    ],
+    "txt_path": "data/knowledge_base/kb_dealer_vs_independent.txt",
+    "pdf_path": "data/knowledge_base/kb_dealer_vs_independent.pdf",
+    "content": "Warranty diagnosis, recall repairs, and ToyotaCare scheduled maintenance belong at an authorized Toyota dealer. Emergency tows should go to the nearest Toyota dealer, or the servicing dealer on a same-visit come-back. Independent shops may do some out-of-warranty work, but they generally cannot close campaign repairs or ToyotaCare come-backs."
+  },
+  {
+    "document_id": "kb_hybrid_12v",
+    "title": "Hybrid No-Start and Towing Rules",
+    "section": "12-volt versus hybrid battery",
+    "tags": [
+      "hybrid",
+      "battery",
+      "ready",
+      "jump",
+      "flatbed",
+      "rav4",
+      "volt",
+      "inverter",
+      "nostart"
+    ],
+    "txt_path": "data/knowledge_base/kb_hybrid_12v.txt",
+    "pdf_path": "data/knowledge_base/kb_hybrid_12v.pdf",
+    "content": "A hybrid that is silent and will not show READY is often a discharged 12-volt battery, not a failed hybrid pack. Offer a jump-start first. If the vehicle still will not start, use a flatbed. Do not tow a hybrid or BEV with the drive wheels rolling. Hybrid battery coverage for 2020 and newer is commonly 10 years or 150,000 miles; other hybrid components are commonly 8 years or 100,000 miles."
+  },
+  {
+    "document_id": "kb_bev_charging",
+    "title": "BEV and PHEV Charge, Range, and Tow-to-Charger",
+    "section": "Electrified stranded owner",
+    "tags": [
+      "charge",
+      "charging",
+      "bev",
+      "phev",
+      "bz4x",
+      "range",
+      "evse",
+      "winter"
+    ],
+    "txt_path": "data/knowledge_base/kb_bev_charging.txt",
+    "pdf_path": "data/knowledge_base/kb_bev_charging.pdf",
+    "content": "If a bZ or PHEV will not charge, collect EVSE type, public versus home, app errors, and whether the vehicle can still move. Charging-procedure exclusions exist in BEV warranty. Winter range drop can be normal; capacity loss to 70 percent of original is the usual BEV battery warranty conversation. Do not offer gasoline fuel delivery. Tow to a compatible charger on a flatbed."
+  },
+  {
+    "document_id": "kb_warranty_recall",
+    "title": "Warranty, Goodwill, and Recall Campaign Guide",
+    "section": "Coverage and VIN campaigns",
+    "tags": [
+      "warranty",
+      "recall",
+      "campaign",
+      "vin",
+      "powertrain",
+      "transmission",
+      "safety",
+      "sense",
+      "loaner",
+      "stop-sale"
+    ],
+    "txt_path": "data/knowledge_base/kb_warranty_recall.txt",
+    "pdf_path": "data/knowledge_base/kb_warranty_recall.pdf",
+    "content": "Typical new-vehicle coverage is 3 years/36,000 miles basic and 5 years/60,000 miles powertrain. If a dealer cannot resolve a warranty concern, Brand Engagement opens a case with VIN, mileage, and dealer name. Safety recalls and service campaigns are free; VIN lookup determines whether the owner may drive or must stop. Stop-sale or do-not-drive bulletins require tow and loaner, not continued commuting."
+  },
+  {
+    "document_id": "kb_ncds_lemon",
+    "title": "NCDS, California CDSP, and Lemon-Law Boundary",
+    "section": "Unresolved warranty disputes",
+    "tags": [
+      "lemon",
+      "buyback",
+      "ncds",
+      "cdsp",
+      "arbitration",
+      "repurchase",
+      "legal"
+    ],
+    "txt_path": "data/knowledge_base/kb_ncds_lemon.txt",
+    "pdf_path": "data/knowledge_base/kb_ncds_lemon.pdf",
+    "content": "After dealer and Brand Engagement cannot resolve a warranty concern, the owner may file with the National Center for Dispute Settlement, or California Dispute Settlement Program. Agents must not quote a lemon-law or buyback outcome on the call. Using the informal program may be required before certain court actions. Collect repair history, days out of service, and the case number."
+  },
+  {
+    "document_id": "kb_toyotacare",
+    "title": "ToyotaCare Maintenance and Loaner Rules",
+    "section": "Complimentary maintenance versus extra work",
+    "tags": [
+      "toyotacare",
+      "maintenance",
+      "oil",
+      "rotation",
+      "loaner",
+      "appointment",
+      "interval"
+    ],
+    "txt_path": "data/knowledge_base/kb_toyotacare.txt",
+    "pdf_path": "data/knowledge_base/kb_toyotacare.pdf",
+    "content": "ToyotaCare covers factory-scheduled maintenance such as oil and filter as specified, tire rotation, multi-point inspection, and fluid inspection. It is valid at participating Toyota dealers using Genuine Parts when available, not only the selling dealer. Extra dealer-recommended services are not automatically complimentary. Overnight warranty repairs that cannot finish the same day may qualify for transportation assistance; convenience overnights do not."
+  },
+  {
+    "document_id": "kb_connected_services",
+    "title": "Safety, Service, Remote, and Drive Connect",
+    "section": "Trials, SOS lights, and app control",
+    "tags": [
+      "safety",
+      "connect",
+      "trial",
+      "expired",
+      "subscription",
+      "remote",
+      "drive",
+      "sos",
+      "lights"
+    ],
+    "txt_path": "data/knowledge_base/kb_connected_services.txt",
+    "pdf_path": "data/knowledge_base/kb_connected_services.pdf",
+    "content": "Safety Connect is SOS, Automatic Collision Notification, stolen-vehicle locator, and enhanced roadside. Green SOS light means active; red except startup flash is hardware; both off is inactive trial or subscription. Service Connect sends vehicle health and warning-light alerts; dealer contact is opt-in. Remote Connect is lock, start, and locate. Drive Connect includes Destination Assist. Restore or cancel in the Toyota app Shop, Manage Subscriptions."
+  },
+  {
+    "document_id": "kb_service_connect_privacy",
+    "title": "Service Connect Consent and Location Privacy",
+    "section": "Dealer outreach opt-out",
+    "tags": [
+      "privacy",
+      "opt-out",
+      "opt",
+      "service",
+      "connect",
+      "tracking",
+      "location",
+      "dealer",
+      "calls",
+      "consent"
+    ],
+    "txt_path": "data/knowledge_base/kb_service_connect_privacy.txt",
+    "pdf_path": "data/knowledge_base/kb_service_connect_privacy.pdf",
+    "content": "Unwanted dealer calls or texts from Service Connect are an opt-in consent issue. Owners can disable dealer notifications in the Toyota app privacy portal, reply STOP, or ask Brand Engagement at 1-800-331-4331. Explain that Safety Connect, Service Connect, and Remote Connect collect different data. Live location is for dispatch and legal process. Law-enforcement location requests generally need a warrant except exigent 1-800-331-4331 cases."
+  },
+  {
+    "document_id": "kb_collision_tccc",
+    "title": "Toyota Certified Collision Center and ADAS Calibration",
+    "section": "Where to take the car after a crash",
+    "tags": [
+      "collision",
+      "crash",
+      "aftermarket",
+      "parts",
+      "certified",
+      "tccc",
+      "windshield",
+      "radar",
+      "calibration",
+      "insurance"
+    ],
+    "txt_path": "data/knowledge_base/kb_collision_tccc.txt",
+    "pdf_path": "data/knowledge_base/kb_collision_tccc.pdf",
+    "content": "After a crash, the owner generally chooses the repair facility even if an insurer recommends another shop. Toyota Certified Collision Centers use processes for Genuine parts, airbags, and Toyota Safety Sense calibration after windshield, bumper, or radar work. Skipping ADAS recalibration can leave pre-collision braking or lane tracing inoperative. Document the claim and locate the nearest TCCC."
+  },
+  {
+    "document_id": "kb_stolen_vehicle",
+    "title": "Stolen Vehicle Locator",
+    "section": "Police report first",
+    "tags": [
+      "stolen",
+      "theft",
+      "police",
+      "locator",
+      "gps",
+      "safety",
+      "connect"
+    ],
+    "txt_path": "data/knowledge_base/kb_stolen_vehicle.txt",
+    "pdf_path": "data/knowledge_base/kb_stolen_vehicle.pdf",
+    "content": "Stolen-vehicle locator is a Safety Connect feature, not a consumer remote-disable. The owner must file a police report first, then call 1-800-331-4331 with the case number. Agents share GPS with police. Do not tell the owner Toyota will shut the car off from the phone as a consumer feature."
+  },
+  {
+    "document_id": "kb_tfs_extra_care",
+    "title": "Toyota Financial Services and Extra Care Transfer",
+    "section": "Wrong-queue money calls",
+    "tags": [
+      "payoff",
+      "lease",
+      "tfs",
+      "finance",
+      "vsa",
+      "extra",
+      "care",
+      "claim",
+      "rental"
+    ],
+    "txt_path": "data/knowledge_base/kb_tfs_extra_care.txt",
+    "pdf_path": "data/knowledge_base/kb_tfs_extra_care.pdf",
+    "content": "Do not quote a loan payoff, lease-end amount, late fee, or VSA claim decision from a Brand Engagement script. Transfer payments and hardship to Toyota Financial Services at 1-800-874-8822. Vehicle Service Agreement authorization is Extra Care at 1-800-228-8559 and usually needs prior approval. Unauthorized repairs can be denied."
+  },
+  {
+    "document_id": "kb_lockout_keys",
+    "title": "Lockout, Immobilizer, and Lost Keys",
+    "section": "Roadside unlock versus dealer programming",
+    "tags": [
+      "lockout",
+      "keys",
+      "fob",
+      "immobilizer",
+      "unlock",
+      "locksmith"
+    ],
+    "txt_path": "data/knowledge_base/kb_lockout_keys.txt",
+    "pdf_path": "data/knowledge_base/kb_lockout_keys.pdf",
+    "content": "Keys locked in the car can use Remote Connect unlock if subscribed and it is legal and safe, otherwise roadside lockout. Immobilizer keys are restricted. All keys lost usually needs a dealer or ALOA registered locksmith. Distinguish a no-start immobilizer from a dead 12-volt battery before towing."
+  },
+  {
+    "document_id": "kb_tss_adas",
+    "title": "Toyota Safety Sense False Braking or Inoperative",
+    "section": "Camera and radar campaigns",
+    "tags": [
+      "safety",
+      "sense",
+      "pre-collision",
+      "braking",
+      "lda",
+      "radar",
+      "camera",
+      "campaign"
+    ],
+    "txt_path": "data/knowledge_base/kb_tss_adas.txt",
+    "pdf_path": "data/knowledge_base/kb_tss_adas.pdf",
+    "content": "Unexpected pre-collision braking or a Toyota Safety Sense inoperative message needs dealer inspection immediately. Check camera and radar blockage from ice, dirt, or aftermarket plates, and search VIN campaigns. Do not tell the owner to ignore pre-collision braking. After windshield work, calibration is required."
+  },
+  {
+    "document_id": "kb_owner_privacy",
+    "title": "Owner Identity and Privacy Checklist",
+    "section": "VIN and account data",
+    "tags": [
+      "privacy",
+      "identity",
+      "vin",
+      "account",
+      "location",
+      "payment"
+    ],
+    "txt_path": "data/knowledge_base/kb_owner_privacy.txt",
+    "pdf_path": "data/knowledge_base/kb_owner_privacy.pdf",
+    "content": "Verify the caller with VIN, mileage, and owner identifiers before discussing warranty, financing, or vehicle location. Do not store payment-card numbers in the transcript. Live location is for dispatch only. Law-enforcement location requests generally require a warrant except exigent circumstances."
   }
 ]

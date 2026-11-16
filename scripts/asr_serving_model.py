@@ -81,7 +81,7 @@ class FasterWhisperASR(PythonModel):
                 vad_filter=False,
                 condition_on_previous_text=False,
                 without_timestamps=True,
-                initial_prompt="A healthcare call center conversation between a patient and an agent.",
+                initial_prompt="A Toyota owner-support call between a caller and an agent.",
             )
             segment_list = list(segments)
             text = " ".join(segment.text.strip() for segment in segment_list).strip()

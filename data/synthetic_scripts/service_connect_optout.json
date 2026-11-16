@@ -1,0 +1,61 @@
+{
+  "title": "Service Connect Dealer Opt-Out",
+  "patient": "Elena Rossi",
+  "intent": "service_connect_privacy_optout",
+  "family": "Connected services & privacy",
+  "catalog_ids": [
+    "N6",
+    "N7",
+    "N11"
+  ],
+  "queue": "Brand Engagement Center privacy / connected services",
+  "vehicle": "2023 Highlander enrolled in Service Connect",
+  "location": "At home, receiving repeated dealer calls and texts",
+  "coverage": "Service Connect dealer contact is opt-in; can be stopped in app or by BEC",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+      "start_ms": 800,
+      "end_ms": 4468
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "The dealer keeps calling me because of a Service Connect alert. I never asked for that. I want it stopped.",
+      "start_ms": 4953,
+      "end_ms": 10932
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "Dealer contact from Service Connect is opt-in. I can help you turn off dealer notifications in the Toyota app privacy settings, or I can take the request here.",
+      "start_ms": 11508,
+      "end_ms": 20799
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "I also do not want Toyota tracking my location. Please opt me out today.",
+      "start_ms": 21359,
+      "end_ms": 26139
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "I will process the dealer opt-out and explain what Safety Connect, Service Connect, and Remote Connect collect. Law-enforcement location requests still follow legal process.",
+      "start_ms": 26796,
+      "end_ms": 37055
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Thank you. Reply STOP did not work on the texts, so I called.",
+      "start_ms": 37556,
+      "end_ms": 41958
+    }
+  ],
+  "scenario_id": "service_connect_optout",
+  "audio_path": "data/generated_audio/service_connect_optout.wav"
+}

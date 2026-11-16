@@ -4,6 +4,7 @@ from __future__ import annotations
 import os
 import shutil
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 
 
@@ -48,7 +49,17 @@ def build_frontend(dist: Path) -> None:
         try:
             subprocess.run(command, cwd=ROOT, env=env, check=True)
             if (dist / "index.html").exists():
-                print(f"Built React frontend into {dist}")
+                index = dist / "index.html"
+                stamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S")
+                html = index.read_text(encoding="utf-8")
+                if 'name="build-id"' not in html:
+                    html = html.replace(
+                        "</title>",
+                        f'</title>\n    <meta name="build-id" content="{stamp}" />',
+                        1,
+                    )
+                index.write_text(html, encoding="utf-8")
+                print(f"Built React frontend into {dist} build-id={stamp}")
                 return
         except (OSError, subprocess.CalledProcessError) as error:
             print(f"React build failed, falling back to ui-preview.html: {error}")
@@ -108,6 +119,7 @@ def main() -> int:
     build_frontend(PACKAGE_DST / "__dist__")
     write_runtime_files()
     print(f"Built Databricks App source bundle at {BUILD}")
+    print("`.build/` is gitignored — deploy with `python3 scripts/deploy_toyota_app.py` so the frontend uploads.")
     return 0
 
 

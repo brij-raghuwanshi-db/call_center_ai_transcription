@@ -99,11 +99,19 @@ def _build_engine_url(
         )
 
     if db_config.endpoint_name:
-        parsed = urlparse(db_config.endpoint_name)
+        endpoint = db_config.endpoint_name
+        prefix = "postgresql+psycopg"
+        username = db_config.username or ws.config.client_id or ws.current_user.me().user_name
+        if endpoint.startswith("projects/") and "/endpoints/" in endpoint:
+            details = ws.postgres.get_endpoint(name=endpoint)
+            host = getattr(getattr(details.status, "hosts", None), "host", None)
+            if not host:
+                raise ValueError(f"Lakebase endpoint {endpoint} did not return a hostname")
+            logger.info("Using Lakebase Autoscaling endpoint %s host %s", endpoint, host)
+            return f"{prefix}://{username}:@{host}:{db_config.port}/{db_config.database_name}"
+        parsed = urlparse(endpoint)
         if parsed.hostname:
             logger.info("Using Lakebase endpoint URL injected by Databricks Apps")
-            prefix = "postgresql+psycopg"
-            username = db_config.username or ws.config.client_id or ws.current_user.me().user_name
             database = parsed.path.rstrip("/").split("/")[-1] or db_config.database_name
             return f"{prefix}://{username}:@{parsed.hostname}:{parsed.port or db_config.port}/{database}"
 
@@ -176,7 +184,11 @@ def validate_db(engine: Engine, db_config: DatabaseConfig) -> None:
         logger.info(
             f"Validating Lakebase connection to {db_config.host}/{db_config.database_name}"
         )
-    else:
+    elif db_config.endpoint_name:
+        logger.info(
+            "Validating Lakebase Autoscaling endpoint %s", db_config.endpoint_name
+        )
+    elif db_config.instance_name:
         logger.info(
             f"Validating database connection to instance {db_config.instance_name}"
         )
@@ -187,6 +199,10 @@ def validate_db(engine: Engine, db_config: DatabaseConfig) -> None:
             raise ValueError(
                 f"Database instance {db_config.instance_name} does not exist"
             )
+    else:
+        raise ValueError(
+            "Lakebase is missing PGHOST/LAKEBASE_ENDPOINT or LAKEBASE_INSTANCE_NAME"
+        )
 
     try:
         with Session(engine) as session:
@@ -199,6 +215,8 @@ def validate_db(engine: Engine, db_config: DatabaseConfig) -> None:
         logger.info("Local dev database connection validated successfully")
     elif db_config.host:
         logger.info("Lakebase connection validated successfully")
+    elif db_config.endpoint_name:
+        logger.info("Lakebase Autoscaling endpoint connection validated successfully")
     else:
         logger.info(
             f"Database connection to instance {db_config.instance_name} validated successfully"
@@ -206,10 +224,14 @@ def validate_db(engine: Engine, db_config: DatabaseConfig) -> None:
 
 
 def initialize_models(engine: Engine) -> None:
-    """Create all SQLModel tables."""
-    logger.info("Initializing database models")
+    """Create the Toyota OLTP schema and SQLModel tables."""
+    from .. import models as _models  # noqa: F401
+
+    logger.info("Initializing Lakebase schema toyota_callcenter")
+    with engine.begin() as connection:
+        connection.execute(text("CREATE SCHEMA IF NOT EXISTS toyota_callcenter"))
     SQLModel.metadata.create_all(engine)
-    logger.info("Database models initialized successfully")
+    logger.info("Lakebase models initialized successfully")
 
 
 # --- Dependency ---
@@ -239,8 +261,14 @@ class _LakebaseDependency(LifespanDependency):
             engine = create_db_engine(db_config, ws)
             validate_db(engine, db_config)
             initialize_models(engine)
+            try:
+                from ..operational_store import seed_demo_history_if_empty
+
+                seed_demo_history_if_empty(engine, ws, app.state.config)
+            except Exception as seed_error:
+                logger.warning("Lakebase demo history seed skipped: %s", seed_error)
         except Exception as error:
-            logger.warning("Lakebase initialization failed; running with in-memory demo state: %s", error)
+            logger.exception("Lakebase initialization failed; running with in-memory demo state: %s", error)
             app.state.engine = None
             yield
             return

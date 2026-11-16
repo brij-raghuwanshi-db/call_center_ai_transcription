@@ -72,6 +72,12 @@ class Scenario(BaseModel):
     patient_name: str
     intent: str
     expected_risk_level: RiskLevel
+    family: str = "Roadside & warning lights"
+    catalog_ids: list[str] = Field(default_factory=list)
+    queue: str = "Toyota Brand Engagement Center"
+    vehicle: str = ""
+    location: str = ""
+    coverage: str = ""
 
 
 class TranscriptSegment(BaseModel):
@@ -161,7 +167,7 @@ class ActiveCall(BaseModel):
 
 
 class StartCallIn(BaseModel):
-    scenario_id: str = "symptom_escalation"
+    scenario_id: str = "coolant_overheat"
     settings: CallSettings = Field(default_factory=CallSettings)
 
 
@@ -246,21 +252,36 @@ class EvaluationExample(BaseModel):
     expected_escalation: bool
 
 
+LAKEBASE_SCHEMA = "toyota_callcenter"
+
+
 class ActiveCallTable(SQLModel, table=True):
+    __tablename__ = "calls"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     call_id: str = SQLField(primary_key=True)
     status: str
     scenario_id: str
     scenario_title: str
+    family: str = ""
+    queue: str = ""
+    vehicle: str = ""
+    location: str = ""
+    coverage: str = ""
     patient_name: str
     latest_transcript: str = ""
     latest_intent: str = "unknown"
     current_risk_level: str = "low"
     current_recommendation_id: str | None = None
+    disposition: str | None = None
     started_at: datetime = SQLField(default_factory=utc_now)
     ended_at: datetime | None = None
 
 
 class TranscriptSegmentTable(SQLModel, table=True):
+    __tablename__ = "transcript_segments"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     segment_id: str = SQLField(primary_key=True)
     call_id: str = SQLField(index=True)
     speaker: str
@@ -274,6 +295,9 @@ class TranscriptSegmentTable(SQLModel, table=True):
 
 
 class RecommendationTable(SQLModel, table=True):
+    __tablename__ = "recommendations"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     recommendation_id: str = SQLField(primary_key=True)
     call_id: str = SQLField(index=True)
     trigger_segment_id: str | None = None
@@ -288,6 +312,9 @@ class RecommendationTable(SQLModel, table=True):
 
 
 class FeedbackTable(SQLModel, table=True):
+    __tablename__ = "agent_feedback"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     feedback_id: str = SQLField(primary_key=True)
     recommendation_id: str = SQLField(index=True)
     call_id: str = SQLField(index=True)
@@ -298,6 +325,9 @@ class FeedbackTable(SQLModel, table=True):
 
 
 class CallSummaryWindowTable(SQLModel, table=True):
+    __tablename__ = "call_summary_windows"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     summary_id: str = SQLField(primary_key=True)
     call_id: str = SQLField(index=True)
     window_index: int
@@ -309,6 +339,9 @@ class CallSummaryWindowTable(SQLModel, table=True):
 
 
 class NextBestActionTable(SQLModel, table=True):
+    __tablename__ = "next_best_actions"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     action_id: str = SQLField(primary_key=True)
     recommendation_id: str = SQLField(index=True)
     call_id: str = SQLField(index=True)
@@ -329,6 +362,9 @@ class NextBestActionTable(SQLModel, table=True):
 
 
 class RecommendationAlertTable(SQLModel, table=True):
+    __tablename__ = "recommendation_alerts"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     alert_row_id: str = SQLField(primary_key=True)
     recommendation_id: str = SQLField(index=True)
     call_id: str = SQLField(index=True)
@@ -341,6 +377,9 @@ class RecommendationAlertTable(SQLModel, table=True):
 
 
 class RecommendationCitationTable(SQLModel, table=True):
+    __tablename__ = "recommendation_citations"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     citation_row_id: str = SQLField(primary_key=True)
     recommendation_id: str = SQLField(index=True)
     call_id: str = SQLField(index=True)
@@ -354,6 +393,9 @@ class RecommendationCitationTable(SQLModel, table=True):
 
 
 class AudioArtifactTable(SQLModel, table=True):
+    __tablename__ = "audio_artifacts"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
     audio_artifact_id: str = SQLField(primary_key=True)
     call_id: str = SQLField(index=True)
     filename: str
@@ -361,3 +403,21 @@ class AudioArtifactTable(SQLModel, table=True):
     bytes_received: int
     source: str = "volume_upload"
     created_at: datetime = SQLField(default_factory=utc_now)
+
+
+class CallClosureTable(SQLModel, table=True):
+    __tablename__ = "call_closures"
+    __table_args__ = {"schema": LAKEBASE_SCHEMA}
+
+    call_id: str = SQLField(primary_key=True)
+    disposition: str
+    family: str = ""
+    queue: str = ""
+    intent: str = ""
+    risk_level: str = "low"
+    should_escalate: bool = False
+    transcript_count: int = 0
+    recommendation_count: int = 0
+    resolution_summary: str = ""
+    closed_by: str = "demo-agent"
+    closed_at: datetime = SQLField(default_factory=utc_now)

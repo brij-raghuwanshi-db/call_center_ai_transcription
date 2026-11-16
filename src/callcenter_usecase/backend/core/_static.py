@@ -35,11 +35,13 @@ class CachedStaticFiles(StaticFiles):
 
         if "/assets/" in str(full_path):
             response.headers["cache-control"] = "public, max-age=31536000, immutable"
-        else:
-            response.headers["cache-control"] = "no-cache"
-
-        if self.is_not_modified(response.headers, request_headers):
-            return NotModifiedResponse(response.headers)
+            if self.is_not_modified(response.headers, request_headers):
+                return NotModifiedResponse(response.headers)
+            return response
+        response.headers["cache-control"] = "no-store, no-cache, max-age=0, must-revalidate"
+        response.headers["pragma"] = "no-cache"
+        response.headers["expires"] = "0"
+        response.headers["surrogate-control"] = "no-store"
         return response
 
 
@@ -62,7 +64,9 @@ def add_not_found_handler(app: FastAPI) -> None:
 
             if (not is_api) and is_get_page_nav and (not looks_like_asset):
                 # Let the SPA router handle it
-                return FileResponse(dist_dir / "index.html")
+                response = FileResponse(dist_dir / "index.html")
+                response.headers["cache-control"] = "no-store, max-age=0, must-revalidate"
+                return response
         # Default: return the original HTTP error (JSON 404 for API, etc.)
         return JSONResponse({"detail": exc.detail}, status_code=exc.status_code)
 

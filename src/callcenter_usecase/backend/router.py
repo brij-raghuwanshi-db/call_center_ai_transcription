@@ -1,8 +1,7 @@
 from databricks.sdk.service.iam import User as UserOut
 from fastapi import BackgroundTasks, File, HTTPException, Request, Response, UploadFile
-from sqlmodel import Session
-
-from .core import Dependencies, create_router, logger
+from fastapi.responses import FileResponse
+from .core import Dependencies, create_router
 from .models import (
     ActiveCall,
     AgentFeedback,
@@ -10,23 +9,20 @@ from .models import (
     AppConfigOut,
     AudioChunkIn,
     AudioUploadOut,
-    ActiveCallTable,
     DemoMetrics,
+    DemoMode,
     EvaluationExample,
-    FeedbackTable,
     FeedbackIn,
     KnowledgeDocument,
     Recommendation,
-    RecommendationTable,
     Scenario,
     StartCallIn,
     StartCallOut,
-    TranscriptSegmentTable,
     TranscriptSegment,
 )
 from .models import VersionOut
+from . import operational_store
 from . import services
-from . import lakebase_persistence
 
 router = create_router()
 
@@ -75,20 +71,51 @@ async def list_evaluation_examples():
 
 
 @router.post("/calls/start", response_model=StartCallOut, operation_id="startCall")
-async def start_call(payload: StartCallIn, request: Request, config: Dependencies.Config, background_tasks: BackgroundTasks):
+async def start_call(
+    payload: StartCallIn,
+    request: Request,
+    config: Dependencies.Config,
+    ws: Dependencies.Client,
+    background_tasks: BackgroundTasks,
+):
     result = services.start_call(payload)
-    _persist_call(request, result.call)
-    background_tasks.add_task(services.warm_asr_endpoint, config)
+    operational_store.enqueue_persist_call(_engine(request), ws, config, result.call)
+    if payload.settings.demo_mode != DemoMode.MICROPHONE:
+        background_tasks.add_task(
+            services.ingest_scenario_audio,
+            result.call.call_id,
+            config,
+            ws,
+            _engine(request),
+        )
     return result
 
 
+@router.post(
+    "/calls/{call_id}/live-microphone",
+    response_model=ActiveCall,
+    operation_id="enableLiveMicrophone",
+)
+async def enable_live_microphone(call_id: str):
+    try:
+        return services.enable_live_microphone(call_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @router.post("/calls/{call_id}/stop", response_model=ActiveCall, operation_id="stopCall")
-async def stop_call(call_id: str, request: Request, background_tasks: BackgroundTasks):
+async def stop_call(
+    call_id: str,
+    request: Request,
+    config: Dependencies.Config,
+    ws: Dependencies.Client,
+):
     try:
         call = services.stop_call(call_id)
-        background_tasks.add_task(
-            _persist_stopped_call,
+        operational_store.enqueue_persist_stopped_call(
             _engine(request),
+            ws,
+            config,
             call,
             list(services.transcript_for_call(call.call_id)),
             list(services.recommendations_for_call(call.call_id)),
@@ -131,19 +158,20 @@ async def get_transcript(call_id: str):
 async def process_audio_chunk(
     payload: AudioChunkIn,
     config: Dependencies.Config,
+    ws: Dependencies.Client,
     request: Request,
     background_tasks: BackgroundTasks,
 ):
     try:
-        segment = services.transcribe_chunk(payload, config=config)
-        _persist_segment(request, segment)
-        call = services.get_call(segment.call_id)
-        _persist_call(request, call)
+        segment = services.transcribe_chunk(payload, config=config, ws=ws)
+        operational_store.enqueue_persist_segment(_engine(request), ws, config, segment)
         if services.reserve_auto_recommendation(segment.call_id):
             background_tasks.add_task(
                 services.run_reserved_recommendation,
                 AnalyzeIn(call_id=segment.call_id, trigger_segment_id=segment.segment_id),
                 config,
+                ws,
+                _engine(request),
             )
         return segment
     except KeyError as exc:
@@ -154,6 +182,14 @@ async def process_audio_chunk(
         return Response(status_code=204)
 
 
+@router.get("/audio/scenario/{scenario_id}", operation_id="getScenarioAudio")
+def get_scenario_audio(scenario_id: str):
+    path = services.scenario_audio_path(scenario_id)
+    if path is None:
+        raise HTTPException(status_code=404, detail=f"No scenario audio for {scenario_id}")
+    return FileResponse(path, media_type="audio/wav", filename=f"{scenario_id}.wav")
+
+
 @router.post(
     "/audio/upload/{call_id}",
     response_model=AudioUploadOut,
@@ -162,7 +198,7 @@ async def process_audio_chunk(
 async def upload_audio(call_id: str, request: Request, config: Dependencies.Config, file: UploadFile = File(...)):
     try:
         upload = await services.store_upload(call_id, file, config=config)
-        lakebase_persistence.persist_audio_artifact(_engine(request), upload)
+        operational_store.enqueue_persist_upload(_engine(request), upload)
         return upload
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -173,11 +209,16 @@ async def upload_audio(call_id: str, request: Request, config: Dependencies.Conf
     response_model=Recommendation,
     operation_id="analyzeCall",
 )
-async def analyze_call(payload: AnalyzeIn, config: Dependencies.Config, request: Request):
+async def analyze_call(
+    payload: AnalyzeIn,
+    config: Dependencies.Config,
+    ws: Dependencies.Client,
+    request: Request,
+):
     try:
         rec = services.analyze_call(payload, config=config)
-        _persist_recommendation(request, rec)
-        _persist_call(request, services.get_call(rec.call_id))
+        operational_store.enqueue_persist_recommendation(_engine(request), ws, config, rec)
+        operational_store.enqueue_persist_call(_engine(request), ws, config, services.get_call(rec.call_id))
         return rec
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -212,10 +253,16 @@ async def list_recommendations(call_id: str):
     response_model=AgentFeedback,
     operation_id="submitFeedback",
 )
-async def submit_feedback(recommendation_id: str, payload: FeedbackIn, request: Request):
+async def submit_feedback(
+    recommendation_id: str,
+    payload: FeedbackIn,
+    request: Request,
+    config: Dependencies.Config,
+    ws: Dependencies.Client,
+):
     try:
         feedback = services.store_feedback(recommendation_id, payload)
-        _persist_feedback(request, feedback)
+        operational_store.enqueue_persist_feedback(_engine(request), ws, config, feedback)
         return feedback
     except KeyError as exc:
         raise HTTPException(status_code=404, detail=str(exc)) from exc
@@ -236,107 +283,3 @@ async def demo_metrics():
 
 def _engine(request: Request):
     return getattr(request.app.state, "engine", None)
-
-
-def _persist_stopped_call(
-    engine,
-    call: ActiveCall,
-    transcript_segments: list[TranscriptSegment],
-    recommendations: list[Recommendation],
-) -> None:
-    try:
-        lakebase_persistence.persist_final_call_snapshot(
-            engine,
-            call=call,
-            transcript_segments=transcript_segments,
-            recommendations=recommendations,
-        )
-    except Exception:
-        logger.exception("Failed to persist stopped call %s", call.call_id)
-
-
-def _persist_call(request: Request, call: ActiveCall) -> None:
-    engine = _engine(request)
-    if engine is None:
-        return
-    with Session(engine) as session:
-        session.merge(
-            ActiveCallTable(
-                call_id=call.call_id,
-                status=call.status,
-                scenario_id=call.scenario_id,
-                scenario_title=call.scenario_title,
-                patient_name=call.patient_name,
-                latest_transcript=call.latest_transcript,
-                latest_intent=call.latest_intent,
-                current_risk_level=call.current_risk_level,
-                current_recommendation_id=call.current_recommendation_id,
-                started_at=call.started_at,
-                ended_at=call.ended_at,
-            )
-        )
-        session.commit()
-
-
-def _persist_segment(request: Request, segment: TranscriptSegment) -> None:
-    engine = _engine(request)
-    if engine is None:
-        return
-    with Session(engine) as session:
-        session.merge(
-            TranscriptSegmentTable(
-                segment_id=segment.segment_id,
-                call_id=segment.call_id,
-                speaker=segment.speaker,
-                text=segment.text,
-                is_partial=segment.is_partial,
-                start_ms=segment.start_ms,
-                end_ms=segment.end_ms,
-                asr_latency_ms=segment.asr_latency_ms,
-                confidence=segment.confidence,
-                created_at=segment.created_at,
-            )
-        )
-        session.commit()
-
-
-def _persist_recommendation(request: Request, rec: Recommendation) -> None:
-    engine = _engine(request)
-    if engine is None:
-        return
-    with Session(engine) as session:
-        session.merge(
-            RecommendationTable(
-                recommendation_id=rec.recommendation_id,
-                call_id=rec.call_id,
-                trigger_segment_id=rec.trigger_segment_id,
-                intent=rec.intent,
-                topic=rec.topic,
-                risk_level=rec.risk_level,
-                recommended_response=rec.recommended_response,
-                next_best_action=rec.next_best_action,
-                confidence=rec.confidence,
-                llm_latency_ms=rec.llm_latency_ms,
-                created_at=rec.created_at,
-            )
-        )
-        session.commit()
-
-
-def _persist_feedback(request: Request, feedback: AgentFeedback) -> None:
-    engine = _engine(request)
-    if engine is None:
-        return
-    with Session(engine) as session:
-        session.merge(
-            FeedbackTable(
-                feedback_id=feedback.feedback_id,
-                recommendation_id=feedback.recommendation_id,
-                call_id=feedback.call_id,
-                feedback_type=feedback.feedback_type,
-                free_text=feedback.free_text,
-                created_by=feedback.created_by,
-                created_at=feedback.created_at,
-            )
-        )
-        session.commit()

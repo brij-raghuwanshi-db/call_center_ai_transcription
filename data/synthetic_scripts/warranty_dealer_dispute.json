@@ -1,0 +1,61 @@
+{
+  "title": "Warranty Dealer Dispute",
+  "patient": "Denise Walker",
+  "intent": "warranty_bec_liaison",
+  "family": "Warranty, recall & disputes",
+  "catalog_ids": [
+    "G1",
+    "G2",
+    "G8"
+  ],
+  "queue": "Brand Engagement Center",
+  "vehicle": "2022 Camry, 28,000 miles, transmission concern",
+  "location": "At home after a denied dealer repair",
+  "coverage": "Powertrain typically 5 years / 60,000 miles; diagnosis still required",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+      "start_ms": 800,
+      "end_ms": 4468
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "My dealer denied a warranty repair on the transmission. I am done with this dealer. I want Toyota to make this right.",
+      "start_ms": 4939,
+      "end_ms": 11619
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I can open a case with your VIN, mileage, and dealer name, and work with the dealership on a resolution.",
+      "start_ms": 12246,
+      "end_ms": 18499
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "They said it was wear and tear. It is only 28,000 miles.",
+      "start_ms": 18972,
+      "end_ms": 22698
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "Powertrain coverage is typically five years or 60,000 miles, but we still need the diagnosis. I will stay with you as the liaison so you do not have to fight the store alone.",
+      "start_ms": 23221,
+      "end_ms": 33519
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Thank you. I just want someone to own this. If this is a lemon I want a buyback.",
+      "start_ms": 34101,
+      "end_ms": 38944
+    }
+  ],
+  "scenario_id": "warranty_dealer_dispute",
+  "audio_path": "data/generated_audio/warranty_dealer_dispute.wav"
+}

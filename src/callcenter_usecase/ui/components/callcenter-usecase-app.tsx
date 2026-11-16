@@ -15,6 +15,12 @@ type Scenario = {
   patient_name: string;
   intent: string;
   expected_risk_level: RiskLevel;
+  family?: string;
+  catalog_ids?: string[];
+  queue?: string;
+  vehicle?: string;
+  location?: string;
+  coverage?: string;
 };
 
 type ActiveCall = {
@@ -33,7 +39,7 @@ type ActiveCall = {
 type TranscriptSegment = {
   segment_id: string;
   call_id: string;
-  speaker: "Agent" | "Patient" | "Unknown";
+  speaker: "Agent" | "Patient" | "Caller" | "Unknown";
   text: string;
   is_partial: boolean;
   start_ms: number;
@@ -100,10 +106,22 @@ async function api<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 const TARGET_SAMPLE_RATE = 16000;
-const SLICE_SECONDS = 3.6;
-const OVERLAP_SECONDS = 1.2;
-const SILENCE_RMS = 0.005;
-const MAX_PENDING_SLICES = 8;
+const SLICE_SECONDS = 3.0;
+const OVERLAP_SECONDS = 0.4;
+const SILENCE_RMS = 0.008;
+const MAX_PENDING_SLICES = 12;
+const PCM_CAPTURE_WORKLET = `
+class PcmCaptureProcessor extends AudioWorkletProcessor {
+  process(inputs) {
+    const channel = inputs[0] && inputs[0][0];
+    if (channel && channel.length) {
+      this.port.postMessage(channel);
+    }
+    return true;
+  }
+}
+registerProcessor("pcm-capture", PcmCaptureProcessor);
+`;
 
 function downsample(input: Float32Array, inRate: number, outRate: number): Float32Array {
   if (inRate === outRate) return input;
@@ -180,9 +198,37 @@ function formatMs(ms: number) {
   return `${Math.round(ms)} ms`;
 }
 
+function speakerLabel(speaker: string) {
+  return speaker === "Patient" ? "Caller" : speaker;
+}
+
+function isCallerSpeaker(speaker: string) {
+  return speaker === "Patient" || speaker === "Caller";
+}
+
+async function attachPcmCapture(context: AudioContext, onPcm: (frame: Float32Array) => void): Promise<AudioNode> {
+  try {
+    const blob = new Blob([PCM_CAPTURE_WORKLET], { type: "application/javascript" });
+    const url = URL.createObjectURL(blob);
+    await context.audioWorklet.addModule(url);
+    URL.revokeObjectURL(url);
+    const node = new AudioWorkletNode(context, "pcm-capture");
+    node.port.onmessage = (event: MessageEvent<Float32Array>) => {
+      onPcm(event.data);
+    };
+    return node;
+  } catch {
+    const processor = context.createScriptProcessor(4096, 1, 1);
+    processor.onaudioprocess = (event) => {
+      onPcm(new Float32Array(event.inputBuffer.getChannelData(0)));
+    };
+    return processor;
+  }
+}
+
 export default function CallCenterUseCaseApp() {
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
-  const [scenarioId, setScenarioId] = useState("symptom_escalation");
+  const [scenarioId, setScenarioId] = useState("coolant_overheat");
   const [speakerHint, setSpeakerHint] = useState<"Patient" | "Agent">("Patient");
   const [call, setCall] = useState<ActiveCall | null>(null);
   const [transcript, setTranscript] = useState<TranscriptSegment[]>([]);
@@ -194,7 +240,9 @@ export default function CallCenterUseCaseApp() {
   const [redactionEnabled, setRedactionEnabled] = useState(false);
   const [isRunning, setIsRunning] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
-  const [status, setStatus] = useState("Ready to start a Call Center demo call.");
+  const [callMode, setCallMode] = useState<"demo" | "live" | null>(null);
+  const [micLevel, setMicLevel] = useState(0);
+  const [status, setStatus] = useState("Ready. Start a demo call or start live microphone.");
   const speakerHintRef = useRef(speakerHint);
   const callIdRef = useRef<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -206,6 +254,7 @@ export default function CallCenterUseCaseApp() {
   const pendingWavRef = useRef<Blob[]>([]);
   const stoppingRef = useRef(false);
   const stoppedCallIdsRef = useRef<Set<string>>(new Set());
+  const demoAudioRef = useRef<HTMLAudioElement | null>(null);
 
   const currentScenario = useMemo(
     () => scenarios.find((scenario) => scenario.id === scenarioId),
@@ -288,7 +337,7 @@ export default function CallCenterUseCaseApp() {
     }
   }
 
-  async function startCall() {
+  async function startCall(mode: "synthetic" | "microphone" = "synthetic") {
     stoppingRef.current = false;
     try {
       const result = await api<{ call: ActiveCall; transcript: TranscriptSegment[]; recommendation: Recommendation | null }>("/calls/start", {
@@ -299,15 +348,22 @@ export default function CallCenterUseCaseApp() {
             auto_recommendations_enabled: autoRecommend,
             cadence_mode: cadenceMode,
             redaction_enabled: redactionEnabled,
-            demo_mode: "synthetic",
+            demo_mode: mode,
           },
         }),
       });
       setCall(result.call);
+      callIdRef.current = result.call.call_id;
       setTranscript(result.transcript);
       setRecommendation(result.recommendation);
       setIsRunning(true);
-      setStatus(`Started ${result.call.scenario_title} call for ${result.call.patient_name}.`);
+      setCallMode(mode === "microphone" ? "live" : "demo");
+      if (mode === "microphone") {
+        setStatus("Call started. Click Start mic, then allow the browser to use your microphone.");
+      } else {
+        playScenarioAudio(scenarioId);
+        setStatus(`Started ${result.call.scenario_title}. Playing the scenario recording through Whisper.`);
+      }
       await refreshSupervisor();
     } catch (error) {
       setIsRunning(false);
@@ -320,7 +376,10 @@ export default function CallCenterUseCaseApp() {
     stoppingRef.current = true;
     stoppedCallIdsRef.current.add(call.call_id);
     stopMicrophone();
+    stopScenarioAudio();
     setIsRunning(false);
+    setCallMode(null);
+    setMicLevel(0);
     setCall({ ...call, status: "ended" });
     setStatus("Call stopped.");
     try {
@@ -382,6 +441,24 @@ export default function CallCenterUseCaseApp() {
       setStatus(error instanceof Error ? error.message : `Uploaded ${file.name}, but transcription failed.`);
     }
     await refreshCall(call.call_id);
+  }
+
+  function stopScenarioAudio() {
+    const audio = demoAudioRef.current;
+    if (!audio) return;
+    audio.pause();
+    audio.removeAttribute("src");
+    demoAudioRef.current = null;
+  }
+
+  function playScenarioAudio(id: string) {
+    stopScenarioAudio();
+    const audio = new Audio(`/api/audio/scenario/${id}`);
+    audio.preload = "auto";
+    demoAudioRef.current = audio;
+    void audio.play().catch(() => {
+      setStatus("Scenario audio is transcribing in the background. Browser playback was blocked.");
+    });
   }
 
   function stopMicrophone() {
@@ -476,6 +553,8 @@ export default function CallCenterUseCaseApp() {
           setTranscript((previous) => [...previous, segment]);
           setStatus(`Transcribed: ${segment.text}`);
           void refreshCall(callId);
+        } else {
+          setStatus("Whisper heard a slice but returned no new text. Keep talking.");
         }
       }
     } catch (error) {
@@ -489,65 +568,93 @@ export default function CallCenterUseCaseApp() {
   }
 
   async function toggleMic() {
-    if (!call || call.status === "ended") return;
     if (isRecording) {
       stopMicrophone();
-      setStatus("Microphone recording stopped.");
+      setStatus("Microphone stopped. Click Start mic to resume.");
       return;
     }
-    const stream = await navigator.mediaDevices.getUserMedia({
-      audio: {
-        echoCancellation: true,
-        noiseSuppression: false,
-        autoGainControl: true,
-        channelCount: 1,
-      },
-    });
-    const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioContextCtor) {
-      setStatus("This browser does not support AudioContext capture.");
-      stream.getTracks().forEach((track) => track.stop());
+    if (!callIdRef.current || call?.status === "ended") {
+      setStatus("Click Start first, then Start mic.");
       return;
     }
-    let context: AudioContext;
     try {
-      context = new AudioContextCtor({ sampleRate: TARGET_SAMPLE_RATE });
+      await api<ActiveCall>(`/calls/${callIdRef.current}/live-microphone`, { method: "POST" });
     } catch {
-      context = new AudioContextCtor();
+      // Best-effort ingest cancel on older backends.
     }
-    await context.resume();
-    nativeRateRef.current = context.sampleRate || 48000;
-    pcmRef.current = [];
-    pendingWavRef.current = [];
-    const source = context.createMediaStreamSource(stream);
-    const processor = context.createScriptProcessor(4096, 1, 1);
-    processor.onaudioprocess = (event) => {
-      enqueuePcm(new Float32Array(event.inputBuffer.getChannelData(0)));
-    };
-    const silent = context.createGain();
-    silent.gain.value = 0;
-    source.connect(processor);
-    processor.connect(silent);
-    silent.connect(context.destination);
-    audioContextRef.current = context;
-    streamRef.current = stream;
-    captureNodesRef.current = [source, processor, silent];
-    setIsRecording(true);
-    setStatus("Microphone streaming overlapping 3.6-second WAV slices to Whisper.");
+    setCallMode("live");
+    await startMicrophone();
+  }
+
+  async function startMicrophone() {
+    if (!callIdRef.current || isRecording) return;
+    try {
+      stopScenarioAudio();
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: false,
+          noiseSuppression: false,
+          autoGainControl: false,
+          channelCount: 1,
+        },
+      });
+      const AudioContextCtor = window.AudioContext || (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+      if (!AudioContextCtor) {
+        setStatus("This browser does not support AudioContext capture.");
+        stream.getTracks().forEach((track) => track.stop());
+        return;
+      }
+      let context: AudioContext;
+      try {
+        context = new AudioContextCtor({ sampleRate: TARGET_SAMPLE_RATE });
+      } catch {
+        context = new AudioContextCtor();
+      }
+      await context.resume();
+      nativeRateRef.current = context.sampleRate || 48000;
+      pcmRef.current = [];
+      pendingWavRef.current = [];
+      const source = context.createMediaStreamSource(stream);
+      const silent = context.createGain();
+      silent.gain.value = 0;
+      const captureNode = await attachPcmCapture(context, (frame) => {
+        const copy = new Float32Array(frame);
+        const level = rms(copy);
+        setMicLevel((previous) => previous * 0.6 + level * 0.4);
+        enqueuePcm(copy);
+      });
+      source.connect(captureNode);
+      captureNode.connect(silent);
+      silent.connect(context.destination);
+      audioContextRef.current = context;
+      streamRef.current = stream;
+      captureNodesRef.current = [source, captureNode, silent];
+      setIsRecording(true);
+      setStatus("Microphone is live. Speak as Caller or Agent — Whisper transcribes your voice, not the demo recording.");
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Microphone permission failed.";
+      setStatus(`Could not start the microphone: ${message}. Allow microphone access for this site, then click Start mic.`);
+    }
   }
 
   return (
     <div className="min-h-screen bg-background text-foreground">
       <header className="border-b px-6 py-4">
-        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Call Center Use Case</h1>
-            <p className="text-sm text-muted-foreground">
-              Databricks-native live call assistant for patient retention, triage, and next-best actions.
-            </p>
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex items-center gap-4">
+            <img src="/toyota-logo.svg" alt="Toyota" className="h-16 w-16 shrink-0" />
+            <div>
+              <p className="text-xl font-bold leading-tight tracking-tight text-foreground">TOYOTA</p>
+              <h1 className="text-2xl font-bold leading-tight tracking-tight">Call Center</h1>
+              <p className="text-sm text-muted-foreground">
+                Independent Toyota owner-support assistant for Brand Engagement, roadside, Safety Connect, warranty, recall, collision, and privacy calls.
+              </p>
+            </div>
           </div>
           <div className="flex flex-wrap gap-2">
             <Badge variant={isRunning ? "default" : "secondary"}>{isRunning ? "Call active" : "Ready"}</Badge>
+            {callMode === "live" && <Badge variant={isRecording ? "destructive" : "outline"}>{isRecording ? "Live mic" : "Live call"}</Badge>}
+            {callMode === "demo" && <Badge variant="outline">Demo WAV</Badge>}
             <Badge variant="outline">GPT 5.5 via env</Badge>
             <Badge variant="outline">ASR Model Serving</Badge>
             <Badge variant="outline">Lakebase + Delta</Badge>
@@ -559,8 +666,10 @@ export default function CallCenterUseCaseApp() {
         <section className="space-y-4">
           <Card>
             <CardHeader>
-              <CardTitle>Demo Call Controls</CardTitle>
-              <CardDescription>Use generated healthcare audio, upload a WAV, or test microphone chunks.</CardDescription>
+              <CardTitle>Call Controls</CardTitle>
+              <CardDescription>
+                Start a live call, then click Start mic. Use Start demo call only when you want the scenario recording.
+              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <label className="space-y-2 text-sm font-medium">
@@ -571,21 +680,27 @@ export default function CallCenterUseCaseApp() {
                   onChange={(event) => setScenarioId(event.target.value)}
                   disabled={isRunning}
                 >
-                  {scenarios.map((scenario) => (
-                    <option key={scenario.id} value={scenario.id}>{scenario.title}</option>
+                  {Array.from(new Set(scenarios.map((scenario) => scenario.family || "Toyota owner support"))).map((family) => (
+                    <optgroup key={family} label={family}>
+                      {scenarios.filter((scenario) => (scenario.family || "Toyota owner support") === family).map((scenario) => (
+                        <option key={scenario.id} value={scenario.id}>{scenario.title}</option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
               </label>
               {currentScenario && (
                 <p className="rounded-md border bg-muted/40 p-3 text-sm text-muted-foreground">
                   {currentScenario.description}
+                  {currentScenario.catalog_ids?.length ? ` Catalog ${currentScenario.catalog_ids.join(", ")}.` : ""}
                 </p>
               )}
               <div className="grid grid-cols-2 gap-2">
-                <Button onClick={() => void startCall()} disabled={isRunning}>
+                <Button type="button" onClick={() => void startCall("microphone")} disabled={isRunning}>
                   <Play className="h-4 w-4" /> Start
                 </Button>
                 <Button
+                  type="button"
                   variant="outline"
                   onClick={() => void stopCall()}
                   disabled={!call || (call.status !== "active" && !isRunning && !isRecording)}
@@ -594,6 +709,7 @@ export default function CallCenterUseCaseApp() {
                 </Button>
               </div>
               <Button
+                type="button"
                 variant={isRecording ? "destructive" : "outline"}
                 className="w-full"
                 onClick={() => void toggleMic()}
@@ -601,28 +717,44 @@ export default function CallCenterUseCaseApp() {
               >
                 <Mic className="h-4 w-4" /> {isRecording ? "Stop mic" : "Start mic"}
               </Button>
+              <Button type="button" className="w-full" variant="outline" onClick={() => void startCall("synthetic")} disabled={isRunning}>
+                <Play className="h-4 w-4" /> Start demo call
+              </Button>
+              <div className="space-y-1">
+                <div className="h-2 overflow-hidden rounded-full bg-muted">
+                  <div
+                    className="h-full bg-[#EB0A1E] transition-[width] duration-75"
+                    style={{ width: `${Math.min(100, Math.round(micLevel * 400))}%` }}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {isRecording
+                    ? "Speak now. The meter moves when the browser hears you."
+                    : "Click Start, then Start mic. Allow microphone access when the browser asks."}
+                </p>
+              </div>
               <div>
                 <span className="mb-2 block text-sm font-medium">Current speaker</span>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
                     type="button"
                     variant={speakerHint === "Patient" ? "default" : "outline"}
-                    disabled={!call}
+                    disabled={!isRunning && !call}
                     onClick={() => setSpeakerHint("Patient")}
                   >
-                    Patient
+                    Caller
                   </Button>
                   <Button
                     type="button"
                     variant={speakerHint === "Agent" ? "default" : "outline"}
-                    disabled={!call}
+                    disabled={!isRunning && !call}
                     onClick={() => setSpeakerHint("Agent")}
                   >
                     Agent
                   </Button>
                 </div>
                 <span className="mt-1 block text-xs text-muted-foreground">
-                  For the mono mic demo, choose the speaker or say "agent speaking" / "patient speaking".
+                  For the mono mic demo, choose the speaker or say "agent speaking" / "caller speaking".
                 </span>
               </div>
               <label className="block">
@@ -665,13 +797,17 @@ export default function CallCenterUseCaseApp() {
             <CardContent className="space-y-3">
               {groupedTranscript.length === 0 ? (
                 <p className="rounded-md border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  Start a call and process a segment to populate the transcript.
+                  {callMode === "live"
+                    ? "Click Start mic and speak as Caller or Agent. Lines appear after each few seconds of speech."
+                    : isRunning
+                      ? "Whisper is transcribing the scenario recording. Lines appear as each audio slice finishes."
+                      : "Start demo call for the recording, or Start then Start mic for your voice."}
                 </p>
               ) : (
                 groupedTranscript.map((segment) => (
                   <div key={segment.segment_id} className="rounded-lg border p-3">
                     <div className="mb-1 flex items-center justify-between">
-                      <Badge variant={segment.speaker === "Patient" ? "default" : "secondary"}>{segment.speaker}</Badge>
+                      <Badge variant={isCallerSpeaker(segment.speaker) ? "default" : "secondary"}>{speakerLabel(segment.speaker)}</Badge>
                       <span className="text-xs text-muted-foreground">ASR {formatMs(segment.asr_latency_ms)} · confidence {Math.round(segment.confidence * 100)}%</span>
                     </div>
                     <p className="text-sm leading-6">{segment.text}</p>
@@ -747,14 +883,22 @@ export default function CallCenterUseCaseApp() {
           <Card>
             <CardHeader>
               <CardTitle>Customer Profile and Summary</CardTitle>
-              <CardDescription>Synthetic patient context for the demo.</CardDescription>
+              <CardDescription>Toyota owner, vehicle, queue, and coverage for this demo call.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3 text-sm">
               <div className="grid grid-cols-2 gap-2">
-                <span className="text-muted-foreground">Patient</span>
+                <span className="text-muted-foreground">Caller</span>
                 <span className="font-medium">{call?.patient_name || currentScenario?.patient_name || "Not started"}</span>
                 <span className="text-muted-foreground">Scenario</span>
                 <span className="font-medium">{call?.scenario_title || currentScenario?.title || "None"}</span>
+                <span className="text-muted-foreground">Queue</span>
+                <span className="font-medium">{currentScenario?.queue || "Toyota Brand Engagement Center"}</span>
+                <span className="text-muted-foreground">Vehicle</span>
+                <span className="font-medium">{currentScenario?.vehicle || "VIN lookup pending"}</span>
+                <span className="text-muted-foreground">Location</span>
+                <span className="font-medium">{currentScenario?.location || "Unknown"}</span>
+                <span className="text-muted-foreground">Coverage</span>
+                <span className="font-medium">{currentScenario?.coverage || "Verify by VIN"}</span>
                 <span className="text-muted-foreground">Intent</span>
                 <span className="font-medium">{call?.latest_intent || currentScenario?.intent || "unknown"}</span>
               </div>

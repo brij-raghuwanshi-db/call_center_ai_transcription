@@ -1,0 +1,60 @@
+{
+  "title": "Safety Connect Trial Expired",
+  "patient": "Chris Alvarez",
+  "intent": "safety_connect_restore",
+  "family": "Connected services & privacy",
+  "catalog_ids": [
+    "N2",
+    "S7"
+  ],
+  "queue": "Brand Engagement Center connected-services",
+  "vehicle": "2023 Corolla, SOS lights off",
+  "location": "At home, worried about tonight's highway trip",
+  "coverage": "Safety Connect trial expired; roadside 1-800-444-4195 still available",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+      "start_ms": 800,
+      "end_ms": 4468
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "My SOS button does not work. Both lights are off. I thought Safety Connect was included with the car.",
+      "start_ms": 4900,
+      "end_ms": 10906
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "Both lights off usually means the trial or subscription is inactive. Green is active. I can help you re-enroll in the Toyota app.",
+      "start_ms": 11565,
+      "end_ms": 18755
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "What if I need help on the highway tonight?",
+      "start_ms": 19395,
+      "end_ms": 21534
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "You can still use roadside at 1-800-444-4195 or the Toyota app 24/7 button. SOS with GPS dispatch needs an active Safety Connect trial or paid subscription.",
+      "start_ms": 22170,
+      "end_ms": 35491
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Please restore Safety Connect. I do not want to be without SOS.",
+      "start_ms": 35871,
+      "end_ms": 39758
+    }
+  ],
+  "scenario_id": "safety_connect_expired",
+  "audio_path": "data/generated_audio/safety_connect_expired.wav"
+}

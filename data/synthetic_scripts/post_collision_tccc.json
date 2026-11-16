@@ -1,0 +1,61 @@
+{
+  "title": "Post-Collision Repair Guidance",
+  "patient": "Marcus Hale",
+  "intent": "collision_tccc_guidance",
+  "family": "Collision repair",
+  "catalog_ids": [
+    "P1",
+    "P2",
+    "P3"
+  ],
+  "queue": "Brand Engagement Center + Toyota Certified Collision Center locator",
+  "vehicle": "2022 Camry, airbags did not deploy, bumper and windshield damage",
+  "location": "At home the day after a crash; vehicle drivable",
+  "coverage": "Insurance claim open; Genuine parts and ADAS calibration at issue",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Toyota Brand Engagement, how can I help?",
+      "start_ms": 800,
+      "end_ms": 3528
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "I was in a crash yesterday. The insurance shop wants aftermarket parts. Where should I take the car?",
+      "start_ms": 3938,
+      "end_ms": 9878
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "You can choose a Toyota Certified Collision Center. That matters for airbags and Safety Sense calibration after bumper or windshield work.",
+      "start_ms": 10522,
+      "end_ms": 18351
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "The insurer said I have to use their shop.",
+      "start_ms": 18718,
+      "end_ms": 20911
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "You generally choose the repair facility. I can locate a Toyota Certified Collision Center and note Genuine parts plus ADAS recalibration on the file.",
+      "start_ms": 21414,
+      "end_ms": 30254
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Yes, please find a certified center near me. I do not want the radar to be wrong.",
+      "start_ms": 30636,
+      "end_ms": 35738
+    }
+  ],
+  "scenario_id": "post_collision_tccc",
+  "audio_path": "data/generated_audio/post_collision_tccc.wav"
+}

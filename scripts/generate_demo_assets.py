@@ -6,6 +6,7 @@ import math
 import random
 import shutil
 import subprocess
+import sys
 import wave
 from array import array
 from dataclasses import dataclass
@@ -17,6 +18,9 @@ DATA_DIR = ROOT / "data"
 AUDIO_DIR = DATA_DIR / "generated_audio"
 SCRIPT_DIR = DATA_DIR / "synthetic_scripts"
 KB_DIR = DATA_DIR / "knowledge_base"
+sys.path.insert(0, str(ROOT / "src"))
+
+from callcenter_usecase.backend.toyota_catalog import audio_scenario_payloads
 
 TARGET_SR = 16000
 TARGET_SEC = 60.0
@@ -31,83 +35,7 @@ class Utterance:
     gain: float = 0.85
 
 
-SCENARIOS: dict[str, dict] = {
-    "appointment_retention": {
-        "title": "Appointment Retention",
-        "patient": "Maria Johnson",
-        "intent": "appointment_retention",
-        "segments": [
-            ("Agent", "Thank you for calling Call Center, this is Ava. How can I help today?"),
-            ("Patient", "I think I need to cancel my follow-up appointment. I cannot keep missing work."),
-            ("Agent", "I understand. Missing work is stressful. Can I ask what time windows are easiest for you?"),
-            ("Patient", "Early morning might work, but I am not sure the appointment is even worth it."),
-            ("Agent", "Your follow-up helps the care team catch issues early. I can look for an earlier slot and confirm transportation options."),
-            ("Patient", "If you can find something before work, I would probably keep it."),
-        ],
-    },
-    "medication_concern": {
-        "title": "Medication Concern",
-        "patient": "Robert Ellis",
-        "intent": "medication_concern",
-        "segments": [
-            ("Agent", "Thank you for calling Call Center. What medication question can I help route today?"),
-            ("Patient", "This new medicine makes me dizzy. I am thinking about stopping it."),
-            ("Agent", "I am sorry that is happening. Please do not stop a prescribed medication without clinical guidance."),
-            ("Patient", "I just feel off and I do not know if that is normal."),
-            ("Agent", "I can connect you with a nurse to review symptoms and next steps. Are you having trouble breathing or chest pain?"),
-            ("Patient", "No chest pain, but I would like to talk with a nurse."),
-        ],
-    },
-    "billing_confusion": {
-        "title": "Billing Confusion",
-        "patient": "Denise Walker",
-        "intent": "billing_confusion",
-        "segments": [
-            ("Agent", "Call Center, this is Ava. How can I help you today?"),
-            ("Patient", "I got a bill I do not understand. If this is how it works, I am done with these visits."),
-            ("Agent", "I hear how frustrating that is. Let us separate the billing question from the care you still need."),
-            ("Patient", "Nobody explained why I owe this much."),
-            ("Agent", "I can route the billing review and keep your care plan moving while that is checked."),
-            ("Patient", "Okay, I just do not want to be surprised again."),
-        ],
-    },
-    "symptom_escalation": {
-        "title": "Symptom Escalation",
-        "patient": "James Miller",
-        "intent": "symptom_escalation",
-        "segments": [
-            ("Agent", "Thank you for calling Call Center. Tell me what is going on today."),
-            ("Patient", "My chest feels tight and I have been short of breath since this morning."),
-            ("Agent", "I am sorry you are feeling that. Because you mentioned chest tightness and shortness of breath, I need to escalate this right away."),
-            ("Patient", "I was hoping it would pass, but it is getting worse."),
-            ("Agent", "If symptoms are severe or worsening, please call emergency services now. I can also get a nurse on the line immediately."),
-            ("Patient", "Please get the nurse. I am scared."),
-        ],
-    },
-    "care_navigation": {
-        "title": "Care Navigation",
-        "patient": "Linda Chen",
-        "intent": "care_navigation",
-        "segments": [
-            ("Agent", "Call Center, this is Ava. What can I help with?"),
-            ("Patient", "I was discharged yesterday and I do not know who I am supposed to call next."),
-            ("Agent", "I can help organize the next step. Do you have your discharge paperwork nearby?"),
-            ("Patient", "Yes, but it is confusing."),
-            ("Agent", "No problem. We can confirm your follow-up appointment, medication questions, and who to call if symptoms change."),
-            ("Patient", "That would help a lot."),
-        ],
-    },
-}
-
-
-KNOWLEDGE_DOCS = {
-    "appointment_retention_playbook": "When a patient wants to cancel, acknowledge the barrier, ask about scheduling or transportation constraints, and offer a concrete alternative before ending the call.",
-    "medication_concern_handling": "If a patient reports side effects or wants to stop medication, advise them not to discontinue prescribed therapy without clinician direction and offer nurse or pharmacist escalation.",
-    "billing_confusion_deescalation": "For billing frustration, validate the concern, route billing review, and reinforce that care continuity should not pause while the billing issue is investigated.",
-    "symptom_escalation_triage": "Chest tightness, chest pain, severe shortness of breath, fainting, or rapidly worsening symptoms require urgent escalation to nurse triage or emergency services guidance.",
-    "care_navigation_workflow": "For post-discharge confusion, confirm the follow-up appointment, medication questions, warning signs, and the correct contact path for symptom changes.",
-    "hipaa_safe_communication": "Before discussing protected health details, verify identity using approved identifiers and avoid unnecessary disclosure of sensitive information.",
-}
+SCENARIOS: dict[str, dict] = audio_scenario_payloads()
 
 
 def clamp_i16(value: int) -> int:
@@ -231,17 +159,50 @@ def pdf_bytes(title: str, body: str) -> bytes:
 def generate_knowledge_base() -> None:
     KB_DIR.mkdir(parents=True, exist_ok=True)
     rows = []
-    for slug, body in KNOWLEDGE_DOCS.items():
-        title = slug.replace("_", " ").title()
+    from callcenter_usecase.backend.toyota_catalog import KNOWLEDGE_DOCUMENTS
+
+    keep_names = {"documents.json"}
+    for doc in KNOWLEDGE_DOCUMENTS:
+        slug = doc.document_id
+        title = doc.title
+        body = doc.content
         txt_path = KB_DIR / f"{slug}.txt"
         pdf_path = KB_DIR / f"{slug}.pdf"
         txt_path.write_text(f"{title}\n\n{body}\n", encoding="utf-8")
         pdf_path.write_bytes(pdf_bytes(title, body))
-        rows.append({"document_id": slug, "title": title, "txt_path": str(txt_path.relative_to(ROOT)), "pdf_path": str(pdf_path.relative_to(ROOT)), "content": body})
+        keep_names.update({txt_path.name, pdf_path.name})
+        rows.append(
+            {
+                "document_id": slug,
+                "title": title,
+                "section": doc.section,
+                "tags": doc.tags,
+                "txt_path": str(txt_path.relative_to(ROOT)),
+                "pdf_path": str(pdf_path.relative_to(ROOT)),
+                "content": body,
+            }
+        )
     (KB_DIR / "documents.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    for path in KB_DIR.iterdir():
+        if path.is_file() and path.name not in keep_names:
+            path.unlink()
+
+
+def clear_stale_media() -> None:
+    keep_audio = {f"{scenario_id}.wav" for scenario_id in SCENARIOS}
+    keep_scripts = {f"{scenario_id}.json" for scenario_id in SCENARIOS} | {"index.json"}
+    AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+    SCRIPT_DIR.mkdir(parents=True, exist_ok=True)
+    for path in AUDIO_DIR.glob("*.wav"):
+        if path.name not in keep_audio:
+            path.unlink()
+    for path in SCRIPT_DIR.glob("*.json"):
+        if path.name not in keep_scripts:
+            path.unlink()
 
 
 def main() -> int:
+    clear_stale_media()
     generate_audio()
     generate_knowledge_base()
     print(f"Generated demo assets under {DATA_DIR}")

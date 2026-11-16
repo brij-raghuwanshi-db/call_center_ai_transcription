@@ -1,0 +1,60 @@
+{
+  "title": "Accidental SOS vs Destination Assist",
+  "patient": "Hannah Brooks",
+  "intent": "accidental_sos_reroute",
+  "family": "Life-safety & crash",
+  "catalog_ids": [
+    "S6",
+    "N9"
+  ],
+  "queue": "Safety Connect, then Destination Assist",
+  "vehicle": "2024 Grand Highlander, Drive Connect trial active",
+  "location": "Parked in a shopping-center lot, occupants answering",
+  "coverage": "Safety Connect and Drive Connect trials active",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Safety Connect emergency. Is anyone hurt?",
+      "start_ms": 800,
+      "end_ms": 3542
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "No, I am fine. I did not mean to hit the SOS button. I meant to call Destination Assist. I just need a restaurant near me.",
+      "start_ms": 3814,
+      "end_ms": 12076
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I am glad you are safe. This SOS line is for emergencies. I will confirm there is no crash, then we will get Destination Assist on the correct channel.",
+      "start_ms": 12480,
+      "end_ms": 21486
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "Sorry. Can you just send the restaurant into my navigation from here?",
+      "start_ms": 21845,
+      "end_ms": 25795
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "I will not keep an emergency line for a restaurant. I can transfer you to Destination Assist, or you can say Call Destination Assist from the nav menu.",
+      "start_ms": 26284,
+      "end_ms": 35057
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Okay, please transfer me. I did not mean to clog the emergency line.",
+      "start_ms": 35355,
+      "end_ms": 39946
+    }
+  ],
+  "scenario_id": "accidental_sos_dest_assist",
+  "audio_path": "data/generated_audio/accidental_sos_dest_assist.wav"
+}

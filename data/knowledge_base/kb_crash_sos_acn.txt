@@ -1,0 +1,3 @@
+Safety Connect Crash and No-Response Protocol
+
+Automatic Collision Notification or an SOS press with no occupant response is an emergency. Request local police, fire, or EMS to the vehicle GPS. Stay on the line. Optional emergency-contact notification if on file. Do not wait to confirm injury before dispatching when occupants cannot speak. Hybrid and BEV crash response must mention high-voltage isolation for first responders.

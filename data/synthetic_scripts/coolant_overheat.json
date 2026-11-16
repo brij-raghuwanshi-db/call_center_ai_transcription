@@ -1,0 +1,60 @@
+{
+  "title": "Coolant Overheat",
+  "patient": "Maya Chen",
+  "intent": "overheat_roadside_assist",
+  "family": "Roadside & warning lights",
+  "catalog_ids": [
+    "W1",
+    "R7"
+  ],
+  "queue": "Toyota Roadside / Safety Connect",
+  "vehicle": "2023 RAV4 Hybrid, 18,400 miles",
+  "location": "I-35, 20 minutes from a hospital appointment",
+  "coverage": "ToyotaCare active; Safety Connect trial expired",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Toyota, this is Ava. How can I help you?",
+      "start_ms": 800,
+      "end_ms": 4748
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "I was driving and a caution came up saying the car temperature is too high. I have to reach somewhere urgently. Can you connect me to the nearest service center? I am really scared to drive. I think the engine might blow up.",
+      "start_ms": 5233,
+      "end_ms": 17246
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I hear you, and I do not want you to keep driving on a high temperature warning. Can you pull over to a safe place and turn the engine off?",
+      "start_ms": 17859,
+      "end_ms": 25413
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "I am on the highway and I really need to get there. Are you sure I cannot just make it?",
+      "start_ms": 26095,
+      "end_ms": 30631
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "Do not keep driving. A red temperature warning can destroy the engine. Put your hazards on, get to a safe shoulder, and I will dispatch roadside to tow you to the nearest Toyota dealer.",
+      "start_ms": 31011,
+      "end_ms": 41580
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Okay. Please send help. I do not want the engine to blow up.",
+      "start_ms": 42175,
+      "end_ms": 46057
+    }
+  ],
+  "scenario_id": "coolant_overheat",
+  "audio_path": "data/generated_audio/coolant_overheat.wav"
+}

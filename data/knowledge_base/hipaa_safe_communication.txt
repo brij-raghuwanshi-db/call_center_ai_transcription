@@ -1,3 +1,0 @@
-Hipaa Safe Communication
-
-Before discussing protected health details, verify identity using approved identifiers and avoid unnecessary disclosure of sensitive information.

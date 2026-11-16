@@ -1,0 +1,3 @@
+Hybrid No-Start and Towing Rules
+
+A hybrid that is silent and will not show READY is often a discharged 12-volt battery, not a failed hybrid pack. Offer a jump-start first. If the vehicle still will not start, use a flatbed. Do not tow a hybrid or BEV with the drive wheels rolling. Hybrid battery coverage for 2020 and newer is commonly 10 years or 150,000 miles; other hybrid components are commonly 8 years or 100,000 miles.

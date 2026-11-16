@@ -1,0 +1,62 @@
+{
+  "title": "Hybrid No-Start",
+  "patient": "Linda Chen",
+  "intent": "hybrid_12v_roadside",
+  "family": "Roadside & warning lights",
+  "catalog_ids": [
+    "R1",
+    "E1",
+    "E2",
+    "E10"
+  ],
+  "queue": "Toyota Roadside",
+  "vehicle": "2023 RAV4 Hybrid",
+  "location": "Parking garage, vehicle silent",
+  "coverage": "ToyotaCare roadside likely active; confirm VIN",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Toyota roadside, this is Ava. How can I help?",
+      "start_ms": 800,
+      "end_ms": 4108
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "My RAV4 Hybrid will not start. There is no engine sound. I think the hybrid battery is dead.",
+      "start_ms": 4666,
+      "end_ms": 10347
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "A silent hybrid is often the small 12-volt battery, not the hybrid pack. Do you have dashboard lights, and will it go to READY?",
+      "start_ms": 10861,
+      "end_ms": 18462
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "The lights are dim and it will not go to READY.",
+      "start_ms": 18904,
+      "end_ms": 21029
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "I can send a jump-start. If it will not hold, we will flatbed it to a Toyota dealer. Do not have a regular tow roll the drive wheels.",
+      "start_ms": 21659,
+      "end_ms": 29376
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Please send someone. I am in a parking garage.",
+      "start_ms": 29643,
+      "end_ms": 32451
+    }
+  ],
+  "scenario_id": "hybrid_12v_nostart",
+  "audio_path": "data/generated_audio/hybrid_12v_nostart.wav"
+}

@@ -1,0 +1,62 @@
+{
+  "title": "Oil Light After Service",
+  "patient": "James Patel",
+  "intent": "oil_pressure_highway_comeback",
+  "family": "Roadside & warning lights",
+  "catalog_ids": [
+    "W5",
+    "W2",
+    "C1",
+    "R8"
+  ],
+  "queue": "Toyota Roadside, then servicing dealer + BEC",
+  "vehicle": "2022 Camry, 27,900 miles",
+  "location": "I-80 live lanes after yesterday's dealer oil change",
+  "coverage": "ToyotaCare interval service completed yesterday at selling dealer",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Thank you for calling Toyota. What is going on with the vehicle?",
+      "start_ms": 800,
+      "end_ms": 4284
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "The engine light and the oil light started coming up, even though I just had car maintenance. Do I need a dealership or a service center? I am in the middle of the highway and I do not want to get hit.",
+      "start_ms": 4869,
+      "end_ms": 15514
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "The oil light is the urgent one. Please get out of the live lanes, shut the engine off, and do not keep driving. I will send a tow to a Toyota dealer.",
+      "start_ms": 15847,
+      "end_ms": 24693
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "I just had the oil changed yesterday at the Toyota dealer. Why is this happening?",
+      "start_ms": 25072,
+      "end_ms": 29700
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "That makes this a come-back. We will tow you to that dealer so they can check the oil level, drain plug, and filter before anyone debates coverage.",
+      "start_ms": 29980,
+      "end_ms": 38163
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "Okay, please send the tow. I do not want to stay on the highway.",
+      "start_ms": 38561,
+      "end_ms": 42652
+    }
+  ],
+  "scenario_id": "oil_light_comeback",
+  "audio_path": "data/generated_audio/oil_light_comeback.wav"
+}

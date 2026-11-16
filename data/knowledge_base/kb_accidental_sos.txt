@@ -1,0 +1,3 @@
+Accidental SOS Versus Destination Assist
+
+If the occupant answers and there is no injury, crash, or immobilization, confirm safety and close the SOS emergency event. Destination Assist, restaurants, and navigation POIs do not belong on SOS. Transfer to Destination Assist or coach the owner to say Call Destination Assist from the nav menu. No verbal response still means dispatch help.

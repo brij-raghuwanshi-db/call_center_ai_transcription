@@ -19,7 +19,7 @@ CALLCENTER_USECASE_DELTA_SCHEMA_NAME=brijendra_raghuwanshi
 
 Use this namespace for:
 
-- Parsed healthcare knowledge-base chunks.
+- Parsed Toyota knowledge-base chunks.
 - Vector Search source tables.
 - Transcript, recommendation, feedback, audit, and evaluation Delta tables.
 - Demo setup notebooks or jobs that create UC objects.

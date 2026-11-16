@@ -31,17 +31,19 @@ class AppConfig(BaseSettings):
     llm_endpoint_name: str = Field(default="databricks-gpt-5-5")
     asr_endpoint_name: str = Field(default="callcenter-asr-faster-whisper")
     embedding_endpoint_name: str = Field(default="databricks-gte-large-en")
-    vector_search_endpoint_name: str = Field(default="carenet-vs-so")
+    vector_search_endpoint_name: str = Field(default="toyota-cc-vs")
     vector_search_index_name: str = Field(
-        default="classic_stable_84t3jv_catalog.callcenter.kb_index"
+        default="classic_stable_84t3jv_catalog.toyota_callcenter.kb_index"
     )
     uc_catalog: str = Field(default="classic_stable_84t3jv_catalog")
-    uc_schema: str = Field(default="callcenter")
+    uc_schema: str = Field(default="toyota_callcenter")
     volume_name: str = Field(default="demo_assets")
     audio_volume_path: str = Field(
-        default="/Volumes/classic_stable_84t3jv_catalog/callcenter/demo_assets/callcenter_audio"
+        default="/Volumes/classic_stable_84t3jv_catalog/toyota_callcenter/demo_assets/callcenter_audio"
     )
-    delta_schema_name: str = Field(default="callcenter")
+    delta_schema_name: str = Field(default="toyota_callcenter")
+    genie_space_id: str = Field(default="01f1cd73a77c1162b80b4a86b2b72390")
+    warehouse_id: str = Field(default="c22b90f5361e6720")
     use_databricks_asr: bool = Field(default=False)
     use_mock_asr: bool = Field(default=True)
     use_scripted_transcript_fallback: bool = Field(default=False)

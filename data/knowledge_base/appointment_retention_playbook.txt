@@ -1,3 +1,0 @@
-Appointment Retention Playbook
-
-When a patient wants to cancel, acknowledge the barrier, ask about scheduling or transportation constraints, and offer a concrete alternative before ending the call.

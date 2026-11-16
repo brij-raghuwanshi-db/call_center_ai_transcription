@@ -1,0 +1,3 @@
+Dashboard Warning Color and Drive-or-Stop Guide
+
+Red coolant, oil pressure, brake (not parking brake), battery/charging, and EPS warnings mean stop safely now. A flashing check-engine light is urgent even though the lamp is amber. A steady check-engine or TPMS light is drive-cautiously-to-dealer, not a red-light stop. A maintenance wrench is an interval reminder, not an oil-pressure emergency. Always read the multi-information display text.

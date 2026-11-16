@@ -1,0 +1,61 @@
+{
+  "title": "SOS Collision, No Response",
+  "patient": "Priya Nair",
+  "intent": "acn_emergency_dispatch",
+  "family": "Life-safety & crash",
+  "catalog_ids": [
+    "S1",
+    "S2",
+    "S3"
+  ],
+  "queue": "Safety Connect Response Center + 911",
+  "vehicle": "2024 Highlander, Safety Connect active",
+  "location": "GPS from Automatic Collision Notification",
+  "coverage": "Safety Connect subscription active; emergency contact on file",
+  "segments": [
+    {
+      "index": 0,
+      "speaker": "Agent",
+      "text": "Safety Connect emergency. We received an automatic collision notification from the vehicle. Occupants, can you hear me?",
+      "start_ms": 800,
+      "end_ms": 8070
+    },
+    {
+      "index": 1,
+      "speaker": "Patient",
+      "text": "There is no occupant response. I cannot hear anyone in the cabin.",
+      "start_ms": 8345,
+      "end_ms": 12035
+    },
+    {
+      "index": 2,
+      "speaker": "Agent",
+      "text": "I hear no occupant response. I am requesting emergency dispatch to the GPS location now. Stay on the line if anyone can hear me.",
+      "start_ms": 12498,
+      "end_ms": 20737
+    },
+    {
+      "index": 3,
+      "speaker": "Patient",
+      "text": "Help. We were rear-ended. My chest hurts. Please send an ambulance.",
+      "start_ms": 21019,
+      "end_ms": 25343
+    },
+    {
+      "index": 4,
+      "speaker": "Agent",
+      "text": "Help is on the way. Stay in the vehicle with belts on unless there is fire. Do not try to leave live traffic. Are other occupants with you?",
+      "start_ms": 25772,
+      "end_ms": 33652
+    },
+    {
+      "index": 5,
+      "speaker": "Patient",
+      "text": "My daughter is in the back. She is crying but she is awake.",
+      "start_ms": 34168,
+      "end_ms": 37446
+    }
+  ],
+  "scenario_id": "sos_acn_no_response",
+  "audio_path": "data/generated_audio/sos_acn_no_response.wav"
+}

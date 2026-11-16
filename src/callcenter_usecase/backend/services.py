@@ -6,6 +6,7 @@ import json
 import re
 import time
 import wave
+from array import array
 from dataclasses import dataclass, field
 import logging
 from pathlib import Path
@@ -26,6 +27,7 @@ from .models import (
     CallStatus,
     Citation,
     DemoMetrics,
+    DemoMode,
     EvaluationExample,
     FeedbackIn,
     KnowledgeDocument,
@@ -39,165 +41,47 @@ from .models import (
     new_id,
     utc_now,
 )
+from .toyota_catalog import (
+    DEFAULT_SCENARIO_ID,
+    EVALUATION_SET,
+    KNOWLEDGE_BASE,
+    SCENARIOS,
+    SCRIPTED_SEGMENTS,
+    caller_state,
+    recommendation_copy,
+    run_catalog_rules,
+    scenario_by_id,
+)
 
 
-PROJECT_ROOT = Path(__file__).resolve().parents[3]
-DATA_DIR = PROJECT_ROOT / "data"
-AUDIO_DIR = DATA_DIR / "generated_audio"
-AUDIT_DIR = DATA_DIR / "delta_audit_mock"
 logger = logging.getLogger(__name__)
 
 
-SCENARIOS: list[Scenario] = [
-    Scenario(
-        id="appointment_retention",
-        title="Appointment Retention",
-        description="Patient wants to cancel a follow-up visit because they feel overwhelmed.",
-        patient_name="Maria Johnson",
-        intent="appointment_retention",
-        expected_risk_level=RiskLevel.MEDIUM,
-    ),
-    Scenario(
-        id="medication_concern",
-        title="Medication Concern",
-        description="Patient is worried about side effects and may stop taking medication.",
-        patient_name="Robert Ellis",
-        intent="medication_concern",
-        expected_risk_level=RiskLevel.MEDIUM,
-    ),
-    Scenario(
-        id="billing_confusion",
-        title="Billing Confusion",
-        description="Patient is frustrated about a bill and threatens to stop care.",
-        patient_name="Denise Walker",
-        intent="billing_confusion",
-        expected_risk_level=RiskLevel.LOW,
-    ),
-    Scenario(
-        id="symptom_escalation",
-        title="Symptom Escalation",
-        description="Patient describes worsening symptoms and needs triage escalation.",
-        patient_name="James Miller",
-        intent="symptom_escalation",
-        expected_risk_level=RiskLevel.HIGH,
-    ),
-    Scenario(
-        id="care_navigation",
-        title="Care Navigation",
-        description="Patient is unsure what to do after discharge and needs next steps.",
-        patient_name="Linda Chen",
-        intent="care_navigation",
-        expected_risk_level=RiskLevel.LOW,
-    ),
-]
+def resolve_data_dir() -> Path:
+    here = Path(__file__).resolve()
+    for root in (here.parents[2], here.parents[3], Path.cwd()):
+        if (root / "data" / "generated_audio").exists():
+            return root / "data"
+    return here.parents[3] / "data"
 
 
-SCRIPTED_SEGMENTS: dict[str, list[tuple[Speaker, str]]] = {
-    "appointment_retention": [
-        (Speaker.AGENT, "Thank you for calling Call Center, this is Ava. How can I help today?"),
-        (Speaker.PATIENT, "I think I need to cancel my follow-up appointment. I cannot keep missing work."),
-        (Speaker.AGENT, "I understand. Missing work is stressful. Can I ask what time windows are easiest for you?"),
-        (Speaker.PATIENT, "Early morning might work, but I am not sure the appointment is even worth it."),
-        (Speaker.AGENT, "Your follow-up helps the care team catch issues early. I can look for an earlier slot and confirm transportation options."),
-        (Speaker.PATIENT, "If you can find something before work, I would probably keep it."),
-    ],
-    "medication_concern": [
-        (Speaker.AGENT, "Thank you for calling Call Center. What medication question can I help route today?"),
-        (Speaker.PATIENT, "This new medicine makes me dizzy. I am thinking about stopping it."),
-        (Speaker.AGENT, "I am sorry that is happening. Please do not stop a prescribed medication without clinical guidance."),
-        (Speaker.PATIENT, "I just feel off and I do not know if that is normal."),
-        (Speaker.AGENT, "I can connect you with a nurse to review symptoms and next steps. Are you having trouble breathing or chest pain?"),
-        (Speaker.PATIENT, "No chest pain, but I would like to talk with a nurse."),
-    ],
-    "billing_confusion": [
-        (Speaker.AGENT, "Call Center, this is Ava. How can I help you today?"),
-        (Speaker.PATIENT, "I got a bill I do not understand. If this is how it works, I am done with these visits."),
-        (Speaker.AGENT, "I hear how frustrating that is. Let us separate the billing question from the care you still need."),
-        (Speaker.PATIENT, "Nobody explained why I owe this much."),
-        (Speaker.AGENT, "I can route the billing review and keep your care plan moving while that is checked."),
-        (Speaker.PATIENT, "Okay, I just do not want to be surprised again."),
-    ],
-    "symptom_escalation": [
-        (Speaker.AGENT, "Thank you for calling Call Center. Tell me what is going on today."),
-        (Speaker.PATIENT, "My chest feels tight and I have been short of breath since this morning."),
-        (Speaker.AGENT, "I am sorry you are feeling that. Because you mentioned chest tightness and shortness of breath, I need to escalate this right away."),
-        (Speaker.PATIENT, "I was hoping it would pass, but it is getting worse."),
-        (Speaker.AGENT, "If symptoms are severe or worsening, please call emergency services now. I can also get a nurse on the line immediately."),
-        (Speaker.PATIENT, "Please get the nurse. I am scared."),
-    ],
-    "care_navigation": [
-        (Speaker.AGENT, "Call Center, this is Ava. What can I help with?"),
-        (Speaker.PATIENT, "I was discharged yesterday and I do not know who I am supposed to call next."),
-        (Speaker.AGENT, "I can help organize the next step. Do you have your discharge paperwork nearby?"),
-        (Speaker.PATIENT, "Yes, but it is confusing."),
-        (Speaker.AGENT, "No problem. We can confirm your follow-up appointment, medication questions, and who to call if symptoms change."),
-        (Speaker.PATIENT, "That would help a lot."),
-    ],
-}
+def resolve_audio_dir() -> Path:
+    return resolve_data_dir() / "generated_audio"
 
 
-KNOWLEDGE_BASE: list[KnowledgeDocument] = [
-    KnowledgeDocument(
-        document_id="kb_appointment_retention",
-        title="Appointment Retention Playbook",
-        section="Barrier discovery",
-        content="When a patient wants to cancel, acknowledge the barrier, ask about scheduling or transportation constraints, and offer a concrete alternative before ending the call.",
-        tags=["appointment", "retention", "scheduling"],
-    ),
-    KnowledgeDocument(
-        document_id="kb_medication_concern",
-        title="Medication Concern Handling Guide",
-        section="Do not discontinue without clinical guidance",
-        content="If a patient reports side effects or wants to stop medication, advise them not to discontinue prescribed therapy without clinician direction and offer nurse or pharmacist escalation.",
-        tags=["medication", "side effects", "nurse"],
-    ),
-    KnowledgeDocument(
-        document_id="kb_billing_confusion",
-        title="Billing De-escalation Guide",
-        section="Separate billing stress from care continuation",
-        content="For billing frustration, validate the concern, route billing review, and reinforce that care continuity should not pause while the billing issue is investigated.",
-        tags=["billing", "frustration", "retention"],
-    ),
-    KnowledgeDocument(
-        document_id="kb_symptom_escalation",
-        title="Symptom Escalation and Nurse Triage Policy",
-        section="Chest pain or shortness of breath",
-        content="Chest tightness, chest pain, severe shortness of breath, fainting, or rapidly worsening symptoms require urgent escalation to nurse triage or emergency services guidance.",
-        tags=["symptom", "escalation", "urgent", "chest", "breath"],
-    ),
-    KnowledgeDocument(
-        document_id="kb_care_navigation",
-        title="Care Navigation Workflow",
-        section="Post-discharge next steps",
-        content="For post-discharge confusion, confirm the follow-up appointment, medication questions, warning signs, and the correct contact path for symptom changes.",
-        tags=["care navigation", "discharge", "follow-up"],
-    ),
-    KnowledgeDocument(
-        document_id="kb_hipaa",
-        title="HIPAA-Safe Communication Checklist",
-        section="Identity and privacy",
-        content="Before discussing protected health details, verify identity using approved identifiers and avoid unnecessary disclosure of sensitive information.",
-        tags=["hipaa", "privacy", "identity"],
-    ),
-]
+def resolve_audit_dir() -> Path:
+    return resolve_data_dir() / "delta_audit_mock"
 
 
-EVALUATION_SET: list[EvaluationExample] = [
-    EvaluationExample(
-        scenario_id=scenario.id,
-        expected_intent=scenario.intent,
-        expected_risk_level=scenario.expected_risk_level,
-        expected_next_best_action={
-            "appointment_retention": "Offer an alternate appointment time and identify the scheduling barrier.",
-            "medication_concern": "Escalate to a nurse or pharmacist and advise not stopping medication without guidance.",
-            "billing_confusion": "Validate frustration, route billing review, and keep care plan intact.",
-            "symptom_escalation": "Escalate immediately to nurse triage or emergency guidance.",
-            "care_navigation": "Clarify discharge next steps and confirm follow-up plan.",
-        }[scenario.id],
-        expected_escalation=scenario.id in {"medication_concern", "symptom_escalation"},
-    )
-    for scenario in SCENARIOS
-]
+def scenario_audio_path(scenario_id: str) -> Path | None:
+    path = resolve_audio_dir() / f"{scenario_id}.wav"
+    return path if path.exists() else None
+
+
+PROJECT_ROOT = Path(__file__).resolve().parents[3]
+DATA_DIR = resolve_data_dir()
+AUDIO_DIR = resolve_audio_dir()
+AUDIT_DIR = resolve_audit_dir()
 
 
 @dataclass
@@ -210,6 +94,7 @@ class DemoState:
     last_recommendation_started_at: dict[str, float] = field(default_factory=dict)
     feedback: list[AgentFeedback] = field(default_factory=list)
     uploads: dict[str, AudioUploadOut] = field(default_factory=dict)
+    ingest_cancelled: set[str] = field(default_factory=set)
 
 
 @dataclass
@@ -225,12 +110,13 @@ STATE = DemoState()
 
 
 def _scenario_by_id(scenario_id: str) -> Scenario:
-    return next((s for s in SCENARIOS if s.id == scenario_id), SCENARIOS[3])
+    return scenario_by_id(scenario_id)
 
 
 def _append_audit(kind: str, payload: dict) -> None:
-    AUDIT_DIR.mkdir(parents=True, exist_ok=True)
-    path = AUDIT_DIR / f"{kind}.jsonl"
+    audit_dir = resolve_audit_dir()
+    audit_dir.mkdir(parents=True, exist_ok=True)
+    path = audit_dir / f"{kind}.jsonl"
     with path.open("a", encoding="utf-8") as f:
         f.write(json.dumps(payload, default=str) + "\n")
 
@@ -268,7 +154,7 @@ def start_call(payload: StartCallIn) -> StartCallOut:
     return StartCallOut(call=call, transcript=[], recommendation=None)
 
 
-def warm_asr_endpoint(config) -> None:
+def warm_asr_endpoint(config, ws: WorkspaceClient | None = None) -> None:
     if not getattr(config, "use_databricks_asr", False):
         return
     started = time.perf_counter()
@@ -281,6 +167,7 @@ def warm_asr_endpoint(config) -> None:
             "sample_rate": 16000,
             "language": "en-US",
         },
+        ws=ws,
     )
     elapsed_ms = int((time.perf_counter() - started) * 1000)
     logger.info(
@@ -289,6 +176,15 @@ def warm_asr_endpoint(config) -> None:
         elapsed_ms,
         response is not None,
     )
+
+
+def enable_live_microphone(call_id: str) -> ActiveCall:
+    """Switch an active call to live mic and stop leftover scenario-WAV ingest."""
+    call = get_call(call_id)
+    call.settings.demo_mode = DemoMode.MICROPHONE
+    STATE.ingest_cancelled.add(call_id)
+    logger.info("Live microphone enabled; cancelled scenario ingest for call_id=%s", call_id)
+    return call
 
 
 def stop_call(call_id: str) -> ActiveCall:
@@ -326,13 +222,19 @@ def latest_recommendation(call_id: str) -> Recommendation | None:
 
 
 def _script_segment(call: ActiveCall, index: int | None) -> tuple[Speaker, str]:
-    script = SCRIPTED_SEGMENTS[call.scenario_id]
+    script = SCRIPTED_SEGMENTS.get(call.scenario_id) or SCRIPTED_SEGMENTS[DEFAULT_SCENARIO_ID]
     if index is None:
         index = len(STATE.transcripts[call.call_id])
     return script[index % len(script)]
 
 
-def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
+def transcribe_chunk(
+    payload: AudioChunkIn,
+    config=None,
+    ws: WorkspaceClient | None = None,
+    *,
+    dedupe_overlap: bool = True,
+) -> TranscriptSegment:
     started = time.perf_counter()
     call = get_call(payload.call_id)
     if call.status == CallStatus.ENDED:
@@ -348,8 +250,6 @@ def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
             pass
     if config is not None and use_databricks_asr and payload.audio_base64:
         asr_started = time.perf_counter()
-        mime_type = (payload.mime_type or "").lower()
-        filename = payload.filename or ("chunk.wav" if "wav" in mime_type else "chunk.webm")
         served = _query_serving_endpoint(
             config.asr_endpoint_name,
             {
@@ -357,10 +257,11 @@ def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
                 "chunk_id": payload.chunk_id,
                 "audio_base64": payload.audio_base64,
                 "sample_rate": payload.sample_rate,
-                "language": payload.language,
-                "filename": filename,
-                "mime_type": mime_type,
+                "language": payload.language.split("-")[0] if payload.language else "en",
+                "mime_type": payload.mime_type or "audio/wav",
+                "filename": payload.filename or "chunk.wav",
             },
+            ws=ws,
         )
         logger.info(
             "ASR endpoint=%s call_id=%s chunk_id=%s completed in %s ms",
@@ -385,14 +286,19 @@ def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
             served_text = _clean_asr_text(served_text)
             if payload.cumulative_audio:
                 text = _new_cumulative_asr_text(call.call_id, served_text)
-            else:
+            elif dedupe_overlap and call.settings.demo_mode != DemoMode.MICROPHONE:
                 text = _new_overlap_asr_text(call.call_id, served_text)
+            else:
+                text = served_text
             logger.info("ASR produced %s character(s) for call_id=%s", len(text), call.call_id)
         elif served is None:
             logger.warning(
                 "ASR endpoint=%s call_id=%s returned no response",
                 config.asr_endpoint_name,
                 call.call_id,
+            )
+            raise RuntimeError(
+                f"ASR endpoint {config.asr_endpoint_name} returned no response"
             )
     if text:
         speaker, text = _apply_speaker_label(text, speaker)
@@ -405,14 +311,8 @@ def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
     elapsed_ms = int((time.perf_counter() - started) * 1000) + 120
     existing = STATE.transcripts[call.call_id]
     asr_confidence = served_confidence if served_confidence is not None else 0.8
-    if asr_confidence < 0.30:
-        logger.info(
-            "Dropping low-confidence ASR call_id=%s conf=%s text=%s",
-            call.call_id,
-            asr_confidence,
-            text,
-        )
-        raise ValueError("low-confidence ASR")
+    if asr_confidence < 0.05:
+        asr_confidence = 0.05
     segment = TranscriptSegment(
         call_id=call.call_id,
         speaker=speaker,
@@ -425,6 +325,147 @@ def transcribe_chunk(payload: AudioChunkIn, config=None) -> TranscriptSegment:
     )
     add_transcript_segment(segment)
     return segment
+
+
+def ingest_scenario_audio(
+    call_id: str,
+    config=None,
+    ws: WorkspaceClient | None = None,
+    engine=None,
+    *,
+    chunk_seconds: float = 8.0,
+) -> int:
+    """Transcribe the matching scenario WAV through Databricks ASR, with script fallback."""
+    call = get_call(call_id)
+    if call.settings.demo_mode == DemoMode.MICROPHONE:
+        logger.info("Skipping scenario audio ingest for live microphone call_id=%s", call_id)
+        return 0
+    script = SCRIPTED_SEGMENTS.get(call.scenario_id) or SCRIPTED_SEGMENTS[DEFAULT_SCENARIO_ID]
+    audio_path = scenario_audio_path(call.scenario_id)
+    produced = 0
+    if audio_path is not None and getattr(config, "use_databricks_asr", False):
+        logger.info("Ingesting scenario audio %s for call_id=%s", audio_path, call_id)
+        for index, chunk_b64 in enumerate(_wav_base64_chunks(audio_path, chunk_seconds)):
+            if call_id in STATE.ingest_cancelled or get_call(call_id).status == CallStatus.ENDED:
+                logger.info("Stopping scenario ingest for call_id=%s", call_id)
+                break
+            speaker, fallback_text = script[index] if index < len(script) else (Speaker.PATIENT, "")
+            try:
+                transcribe_chunk(
+                    AudioChunkIn(
+                        call_id=call_id,
+                        audio_base64=chunk_b64,
+                        speaker_hint=speaker,
+                        sample_rate=16000,
+                        language="en",
+                        mime_type="audio/wav",
+                        filename="chunk.wav",
+                        cumulative_audio=False,
+                    ),
+                    config=config,
+                    ws=ws,
+                    dedupe_overlap=False,
+                )
+                produced += 1
+                _persist_operational_segment(engine, ws, config, call_id)
+            except Exception as error:
+                logger.warning(
+                    "Scenario ASR chunk %s failed for call_id=%s: %s",
+                    index,
+                    call_id,
+                    error,
+                )
+                if fallback_text:
+                    add_transcript_segment(
+                        TranscriptSegment(
+                            call_id=call_id,
+                            speaker=speaker,
+                            text=fallback_text,
+                            start_ms=index * int(chunk_seconds * 1000),
+                            end_ms=(index + 1) * int(chunk_seconds * 1000),
+                            asr_latency_ms=0,
+                            confidence=0.72,
+                        )
+                    )
+                    produced += 1
+                    _persist_operational_segment(engine, ws, config, call_id)
+    if produced == 0 and call_id not in STATE.ingest_cancelled:
+        logger.warning("Seeding scripted transcript for call_id=%s scenario=%s", call_id, call.scenario_id)
+        for index, (speaker, text) in enumerate(script):
+            if call_id in STATE.ingest_cancelled or get_call(call_id).status == CallStatus.ENDED:
+                break
+            add_transcript_segment(
+                TranscriptSegment(
+                    call_id=call_id,
+                    speaker=speaker,
+                    text=text,
+                    start_ms=index * 8000,
+                    end_ms=(index + 1) * 8000,
+                    asr_latency_ms=0,
+                    confidence=0.7,
+                )
+            )
+            produced += 1
+            _persist_operational_segment(engine, ws, config, call_id)
+    if produced and call.settings.auto_recommendations_enabled:
+        try:
+            recommendation = analyze_call(AnalyzeIn(call_id=call_id), config=config)
+            from . import operational_store
+
+            operational_store.enqueue_persist_recommendation(engine, ws, config, recommendation)
+            operational_store.enqueue_persist_call(engine, ws, config, get_call(call_id))
+        except Exception as error:
+            logger.warning("Post-ingest recommendation failed for call_id=%s: %s", call_id, error)
+    logger.info("Ingested %s transcript segment(s) for call_id=%s", produced, call_id)
+    return produced
+
+
+def _persist_operational_segment(engine, ws, config, call_id: str) -> None:
+    from . import operational_store
+
+    try:
+        segments = transcript_for_call(call_id)
+        if not segments:
+            return
+        operational_store.enqueue_persist_segment(engine, ws, config, segments[-1])
+    except Exception as error:
+        logger.warning("Operational persist failed for call_id=%s: %s", call_id, error)
+
+
+def _wav_base64_chunks(path: Path, chunk_seconds: float) -> list[str]:
+    chunks: list[str] = []
+    with wave.open(str(path), "rb") as source:
+        channels = source.getnchannels()
+        sample_width = source.getsampwidth()
+        sample_rate = source.getframerate()
+        frames_per_chunk = max(1, int(sample_rate * chunk_seconds))
+        min_frames = max(1, int(sample_rate * 0.8))
+        while True:
+            frames = source.readframes(frames_per_chunk)
+            if not frames:
+                break
+            frame_count = len(frames) // max(1, sample_width * channels)
+            if frame_count < min_frames or _pcm16_rms(frames, sample_width) < 0.012:
+                continue
+            buffer = io.BytesIO()
+            with wave.open(buffer, "wb") as output:
+                output.setnchannels(channels)
+                output.setsampwidth(sample_width)
+                output.setframerate(sample_rate)
+                output.writeframes(frames)
+            chunks.append(base64.b64encode(buffer.getvalue()).decode("ascii"))
+    return chunks
+
+
+def _pcm16_rms(frames: bytes, sample_width: int) -> float:
+    if sample_width != 2 or len(frames) < 4:
+        return 1.0
+    samples = array("h")
+    samples.frombytes(frames[: len(frames) - (len(frames) % 2)])
+    if not samples:
+        return 0.0
+    mean_square = sum(sample * sample for sample in samples) / len(samples)
+    return (mean_square ** 0.5) / 32768.0
 
 
 def reserve_auto_recommendation(call_id: str, *, min_interval_seconds: float = 8.0) -> bool:
@@ -442,9 +483,20 @@ def reserve_auto_recommendation(call_id: str, *, min_interval_seconds: float = 8
     return True
 
 
-def run_reserved_recommendation(payload: AnalyzeIn, config=None) -> Recommendation | None:
+def run_reserved_recommendation(
+    payload: AnalyzeIn,
+    config=None,
+    ws: WorkspaceClient | None = None,
+    engine=None,
+) -> Recommendation | None:
     try:
-        return analyze_call(payload, config=config)
+        recommendation = analyze_call(payload, config=config)
+        from . import operational_store
+
+        if recommendation is not None:
+            operational_store.enqueue_persist_recommendation(engine, ws, config, recommendation)
+            operational_store.enqueue_persist_call(engine, ws, config, get_call(payload.call_id))
+        return recommendation
     except Exception as error:
         logger.warning("Auto recommendation for call %s failed: %s", payload.call_id, error)
         return None
@@ -524,7 +576,7 @@ def add_transcript_segment(segment: TranscriptSegment) -> TranscriptSegment:
 
 async def store_upload(call_id: str, upload: UploadFile, config=None) -> AudioUploadOut:
     get_call(call_id)
-    audio_dir = Path(getattr(config, "audio_volume_path", AUDIO_DIR)) if config else AUDIO_DIR
+    audio_dir = Path(getattr(config, "audio_volume_path", None) or resolve_audio_dir()) if config else resolve_audio_dir()
     content = await upload.read()
     safe_name = upload.filename or f"{call_id}.wav"
     path = audio_dir / safe_name
@@ -556,11 +608,20 @@ def retrieve_knowledge(query: str, limit: int = 3, config=None) -> list[Citation
 
 
 def _retrieve_local_knowledge(query: str, limit: int = 3) -> list[Citation]:
-    tokens = {t.lower().strip(".,!?") for t in query.split() if len(t) > 3}
+    tokens = {t.lower().strip(".,!?") for t in query.split() if len(t) >= 3}
     scored: list[tuple[int, KnowledgeDocument]] = []
     for doc in KNOWLEDGE_BASE:
-        haystack = " ".join([doc.title, doc.section, doc.content, *doc.tags]).lower()
-        score = sum(1 for token in tokens if token in haystack)
+        title = doc.title.lower()
+        tags = " ".join(doc.tags).lower()
+        haystack = " ".join([title, doc.section, doc.content, tags]).lower()
+        score = 0
+        for token in tokens:
+            if token in haystack:
+                score += 1
+            if token in tags:
+                score += 2
+            if token in title:
+                score += 1
         if score:
             scored.append((score, doc))
     if not scored:
@@ -696,44 +757,7 @@ def _coerce_float(value: object, fallback: float) -> float:
 
 
 def run_rules(text: str) -> list[Alert]:
-    normalized = text.lower()
-    alerts: list[Alert] = []
-    if any(term in normalized for term in ["chest", "short of breath", "breathing", "fainting"]):
-        alerts.append(
-            Alert(
-                code="urgent_symptom",
-                title="Urgent symptom language",
-                detail="Patient mentioned chest symptoms, breathing trouble, fainting, or worsening symptoms.",
-                risk_level=RiskLevel.HIGH,
-            )
-        )
-    if any(term in normalized for term in ["stopping it", "stop taking", "side effects", "dizzy"]):
-        alerts.append(
-            Alert(
-                code="medication_adherence",
-                title="Medication adherence risk",
-                detail="Patient may stop medication or has possible adverse effects.",
-                risk_level=RiskLevel.MEDIUM,
-            )
-        )
-    if any(term in normalized for term in ["done with", "cancel", "not worth", "missing work"]):
-        alerts.append(
-            Alert(
-                code="retention_risk",
-                title="Patient retention risk",
-                detail="Patient may disengage from care without immediate barrier resolution.",
-                risk_level=RiskLevel.MEDIUM,
-            )
-        )
-    alerts.append(
-        Alert(
-            code="identity_privacy",
-            title="HIPAA reminder",
-            detail="Verify identity before discussing protected health details.",
-            risk_level=RiskLevel.LOW,
-        )
-    )
-    return alerts
+    return run_catalog_rules(text)
 
 
 def analyze_call(payload: AnalyzeIn, config=None) -> Recommendation:
@@ -746,7 +770,7 @@ def analyze_call(payload: AnalyzeIn, config=None) -> Recommendation:
     alerts = run_rules(transcript_window)
     scenario = _scenario_by_id(call.scenario_id)
     risk_level = max([scenario.expected_risk_level, *[a.risk_level for a in alerts]], key=_risk_weight)
-    response, action, rationale = _recommendation_copy(call.scenario_id, risk_level)
+    response, action, rationale = recommendation_copy(call.scenario_id, risk_level)
     served_json = None
     llm_source = "deterministic"
     if config is not None and not config.use_mock_llm:
@@ -772,7 +796,7 @@ def analyze_call(payload: AnalyzeIn, config=None) -> Recommendation:
         trigger_segment_id=trigger,
         intent=_text_field(served_json, "intent", scenario.intent),
         topic=_text_field(served_json, "topic", scenario.title),
-        patient_state=_text_field(served_json, "patient_state", _patient_state(call.scenario_id, transcript_window)),
+        patient_state=_text_field(served_json, "patient_state", caller_state(call.scenario_id, transcript_window)),
         risk_level=risk_level,
         urgency_level=_risk_from_text(str(served_json.get("urgency_level") or risk_level.value), risk_level)
         if isinstance(served_json, dict)
@@ -785,7 +809,10 @@ def analyze_call(payload: AnalyzeIn, config=None) -> Recommendation:
         else 0.81,
         citations=citations,
         alerts=alerts,
-        compliance_notes=["Verify patient identity before discussing PHI.", "Recommendation only; do not execute external actions in V1."],
+        compliance_notes=[
+            "Verify VIN and owner identity before discussing coverage or vehicle location.",
+            "Recommendation only; do not execute external dispatch or dealer actions in V1.",
+        ],
         summary_update=_text_field(served_json, "summary_update", _summary_for(call.call_id)),
         structured_slots={
             "scenario": call.scenario_id,
@@ -804,7 +831,7 @@ def analyze_call(payload: AnalyzeIn, config=None) -> Recommendation:
         else risk_level in {RiskLevel.HIGH, RiskLevel.CRITICAL},
         escalation_reason=str(served_json.get("escalation_reason") or "")
         if isinstance(served_json, dict) and served_json.get("escalation_reason")
-        else "High-risk symptom or clinical concern detected."
+        else "High-risk vehicle safety concern detected."
         if risk_level in {RiskLevel.HIGH, RiskLevel.CRITICAL}
         else None,
         llm_latency_ms=int((time.perf_counter() - started) * 1000) + 250,
@@ -919,52 +946,6 @@ def _format_transcript_window(segments: list[TranscriptSegment], max_segments: i
     return "\n".join(f"{segment.speaker.value}: {segment.text}" for segment in recent)
 
 
-def _patient_state(scenario_id: str, transcript_window: str) -> str:
-    if scenario_id == "symptom_escalation":
-        return "anxious and potentially clinically urgent"
-    if scenario_id == "billing_confusion":
-        return "frustrated and at risk of disengaging"
-    if scenario_id == "appointment_retention":
-        return "overwhelmed by scheduling barriers"
-    if scenario_id == "medication_concern":
-        return "concerned about medication safety"
-    if "confusing" in transcript_window.lower():
-        return "confused and needs clear next steps"
-    return "needs guidance"
-
-
-def _recommendation_copy(scenario_id: str, risk_level: RiskLevel) -> tuple[str, str, str]:
-    if scenario_id == "symptom_escalation":
-        return (
-            "Because you mentioned chest tightness and shortness of breath, I want to get you clinical help immediately.",
-            "Escalate to nurse triage now and advise emergency services if symptoms are severe or worsening.",
-            "Chest tightness and shortness of breath are high-risk symptoms in the triage policy.",
-        )
-    if scenario_id == "medication_concern":
-        return (
-            "I am sorry you are feeling dizzy. Please do not stop the medication until a clinician reviews this with you.",
-            "Offer nurse or pharmacist escalation and ask about severe symptoms.",
-            "Medication discontinuation and side effects require clinical guidance.",
-        )
-    if scenario_id == "billing_confusion":
-        return (
-            "I hear how frustrating this bill is. Let me help route the billing review while we keep your care plan moving.",
-            "Create a billing review handoff and restate the next care step.",
-            "De-escalating billing frustration protects care continuity.",
-        )
-    if scenario_id == "appointment_retention":
-        return (
-            "I understand work makes this hard. Let us find a time that protects your follow-up and fits your schedule.",
-            "Ask for acceptable time windows and offer an alternate appointment.",
-            "Barrier discovery plus a concrete alternative reduces cancellation risk.",
-        )
-    return (
-        "Let us walk through the next step together so you know exactly who to call and what to watch for.",
-        "Confirm follow-up appointment, medication questions, warning signs, and contact path.",
-        "Post-discharge confusion improves with a clear care navigation checklist.",
-    )
-
-
 def _text_field(payload: dict | None, key: str, default: str) -> str:
     if not isinstance(payload, dict):
         return default
@@ -1039,13 +1020,30 @@ def _coerce_alerts(value: object, fallback: list[Alert]) -> list[Alert]:
     return alerts or fallback
 
 
-def _query_serving_endpoint(endpoint_name: str, inputs: dict) -> object | None:
+def _query_serving_endpoint(
+    endpoint_name: str,
+    inputs: dict,
+    ws: WorkspaceClient | None = None,
+) -> object | None:
+    payload = {
+        key: inputs[key]
+        for key in (
+            "call_id",
+            "chunk_id",
+            "audio_base64",
+            "sample_rate",
+            "language",
+            "mime_type",
+            "filename",
+        )
+        if key in inputs
+    }
     try:
-        ws = WorkspaceClient()
+        client = ws or WorkspaceClient()
         try:
-            return ws.serving_endpoints.query(name=endpoint_name, dataframe_records=[inputs])
+            return client.serving_endpoints.query(name=endpoint_name, dataframe_records=[payload])
         except TypeError:
-            return ws.serving_endpoints.query(name=endpoint_name, inputs=inputs)
+            return client.serving_endpoints.query(name=endpoint_name, inputs=payload)
     except Exception as error:
         logger.warning("Serving endpoint %s query failed: %s", endpoint_name, error)
         return None
@@ -1075,10 +1073,17 @@ def _query_reasoning_endpoint(
         "known_patient_name": call.patient_name,
         "latest_transcript_window": transcript_window,
         "instructions": [
-            "Infer the actual call scenario, topic, patient state, risk, and next best action from the transcript.",
+            "Infer the actual Toyota owner-support scenario, topic, owner state, risk, and next best action from the transcript.",
             "Do not assume the initial demo scenario is correct if the transcript indicates a different issue.",
             "If the transcript contains the caller's name, return it as patient_name; otherwise return null.",
-            "Use the speaker labels in the transcript to distinguish patient needs from agent responses.",
+            "Use the speaker labels in the transcript to distinguish owner needs from agent responses.",
+            "Never advise continued driving on a red coolant-temperature or oil-pressure warning.",
+            "Never advise opening a hot radiator or coolant reservoir cap.",
+            "Route immobilized highway calls to roadside or SOS before Brand Engagement warranty discussion.",
+            "Automatic Collision Notification or SOS with no occupant response is emergency dispatch, not a product case.",
+            "Do not keep Destination Assist or restaurant requests on the SOS emergency line.",
+            "Do not quote lemon-law, buyback, payoff, or VSA claim outcomes. Transfer money calls to TFS or Extra Care.",
+            "Service Connect dealer contact is opt-in. Process opt-out requests immediately.",
         ],
         "retrieved_citations": [citation.model_dump() for citation in citations],
         "deterministic_alerts": [alert.model_dump() for alert in alerts],
@@ -1108,9 +1113,10 @@ def _query_reasoning_endpoint(
                 _ServingChatMessage(
                     role="system",
                     content=(
-                        "You are a healthcare call-center next-best-action assistant. "
-                        "Return one valid JSON object only, with no markdown, no prose outside JSON, "
-                        "and values that match the required schema."
+                        "You are a Toyota call-center next-best-action assistant for a human Brand Engagement, "
+                        "roadside, or Safety Connect agent. Return one valid JSON object only, with no markdown, "
+                        "no prose outside JSON, and values that match the required schema. Prioritize occupant "
+                        "safety, stop-driving guidance, and the correct Toyota queue over destination urgency."
                     ),
                 ),
                 _ServingChatMessage(role="user", content=json.dumps(prompt, default=str)),
@@ -1169,7 +1175,7 @@ def _extract_served_confidence(response: object | None) -> float | None:
 def _clean_asr_text(text: str) -> str:
     cleaned = re.sub(r"(?:\s*//)+\s*$", "", text).strip()
     cleaned = re.sub(
-        r"(?i)^(?:a healthcare call center conversation between a patient and an agent[.\s,]*)+",
+        r"(?i)^(?:a (?:healthcare|toyota)(?: call center conversation between a (?:patient|vehicle owner|caller) and an agent| owner-support call between a caller and an agent)[.\s,]*)+",
         "",
         cleaned,
     ).strip()

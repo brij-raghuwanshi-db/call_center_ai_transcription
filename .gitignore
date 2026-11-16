@@ -40,4 +40,5 @@ node_modules/
 src/callcenter_usecase/__dist__/
 # local secrets and generated deploy artifacts
 token_details
+token_Details
 .build/

@@ -1,257 +1,611 @@
 [
   {
-    "title": "Appointment Retention",
-    "patient": "Maria Johnson",
-    "intent": "appointment_retention",
+    "title": "Coolant Overheat",
+    "patient": "Maya Chen",
+    "intent": "overheat_roadside_assist",
+    "family": "Roadside & warning lights",
+    "catalog_ids": [
+      "W1",
+      "R7"
+    ],
+    "queue": "Toyota Roadside / Safety Connect",
+    "vehicle": "2023 RAV4 Hybrid, 18,400 miles",
+    "location": "I-35, 20 minutes from a hospital appointment",
+    "coverage": "ToyotaCare active; Safety Connect trial expired",
     "segments": [
       {
         "index": 0,
         "speaker": "Agent",
-        "text": "Thank you for calling Call Center, this is Ava. How can I help today?",
+        "text": "Thank you for calling Toyota, this is Ava. How can I help you?",
         "start_ms": 800,
-        "end_ms": 5073
+        "end_ms": 4748
       },
       {
         "index": 1,
         "speaker": "Patient",
-        "text": "I think I need to cancel my follow-up appointment. I cannot keep missing work.",
-        "start_ms": 5558,
-        "end_ms": 10024
+        "text": "I was driving and a caution came up saying the car temperature is too high. I have to reach somewhere urgently. Can you connect me to the nearest service center? I am really scared to drive. I think the engine might blow up.",
+        "start_ms": 5233,
+        "end_ms": 17246
       },
       {
         "index": 2,
         "speaker": "Agent",
-        "text": "I understand. Missing work is stressful. Can I ask what time windows are easiest for you?",
-        "start_ms": 10637,
-        "end_ms": 15963
+        "text": "I hear you, and I do not want you to keep driving on a high temperature warning. Can you pull over to a safe place and turn the engine off?",
+        "start_ms": 17859,
+        "end_ms": 25413
       },
       {
         "index": 3,
         "speaker": "Patient",
-        "text": "Early morning might work, but I am not sure the appointment is even worth it.",
-        "start_ms": 16645,
-        "end_ms": 20632
+        "text": "I am on the highway and I really need to get there. Are you sure I cannot just make it?",
+        "start_ms": 26095,
+        "end_ms": 30631
       },
       {
         "index": 4,
         "speaker": "Agent",
-        "text": "Your follow-up helps the care team catch issues early. I can look for an earlier slot and confirm transportation options.",
-        "start_ms": 21012,
-        "end_ms": 27762
+        "text": "Do not keep driving. A red temperature warning can destroy the engine. Put your hazards on, get to a safe shoulder, and I will dispatch roadside to tow you to the nearest Toyota dealer.",
+        "start_ms": 31011,
+        "end_ms": 41580
       },
       {
         "index": 5,
         "speaker": "Patient",
-        "text": "If you can find something before work, I would probably keep it.",
-        "start_ms": 28357,
-        "end_ms": 31883
+        "text": "Okay. Please send help. I do not want the engine to blow up.",
+        "start_ms": 42175,
+        "end_ms": 46057
       }
     ],
-    "scenario_id": "appointment_retention",
-    "audio_path": "data/generated_audio/appointment_retention.wav"
+    "scenario_id": "coolant_overheat",
+    "audio_path": "data/generated_audio/coolant_overheat.wav"
   },
   {
-    "title": "Medication Concern",
-    "patient": "Robert Ellis",
-    "intent": "medication_concern",
+    "title": "Oil Light After Service",
+    "patient": "James Patel",
+    "intent": "oil_pressure_highway_comeback",
+    "family": "Roadside & warning lights",
+    "catalog_ids": [
+      "W5",
+      "W2",
+      "C1",
+      "R8"
+    ],
+    "queue": "Toyota Roadside, then servicing dealer + BEC",
+    "vehicle": "2022 Camry, 27,900 miles",
+    "location": "I-80 live lanes after yesterday's dealer oil change",
+    "coverage": "ToyotaCare interval service completed yesterday at selling dealer",
     "segments": [
       {
         "index": 0,
         "speaker": "Agent",
-        "text": "Thank you for calling Call Center. What medication question can I help route today?",
+        "text": "Thank you for calling Toyota. What is going on with the vehicle?",
         "start_ms": 800,
-        "end_ms": 5573
+        "end_ms": 4284
       },
       {
         "index": 1,
         "speaker": "Patient",
-        "text": "This new medicine makes me dizzy. I am thinking about stopping it.",
-        "start_ms": 6158,
-        "end_ms": 9848
+        "text": "The engine light and the oil light started coming up, even though I just had car maintenance. Do I need a dealership or a service center? I am in the middle of the highway and I do not want to get hit.",
+        "start_ms": 4869,
+        "end_ms": 15514
       },
       {
         "index": 2,
         "speaker": "Agent",
-        "text": "I am sorry that is happening. Please do not stop a prescribed medication without clinical guidance.",
-        "start_ms": 10182,
-        "end_ms": 15972
+        "text": "The oil light is the urgent one. Please get out of the live lanes, shut the engine off, and do not keep driving. I will send a tow to a Toyota dealer.",
+        "start_ms": 15847,
+        "end_ms": 24693
       },
       {
         "index": 3,
         "speaker": "Patient",
-        "text": "I just feel off and I do not know if that is normal.",
-        "start_ms": 16351,
-        "end_ms": 19145
+        "text": "I just had the oil changed yesterday at the Toyota dealer. Why is this happening?",
+        "start_ms": 25072,
+        "end_ms": 29700
       },
       {
         "index": 4,
         "speaker": "Agent",
-        "text": "I can connect you with a nurse to review symptoms and next steps. Are you having trouble breathing or chest pain?",
-        "start_ms": 19424,
-        "end_ms": 25516
+        "text": "That makes this a come-back. We will tow you to that dealer so they can check the oil level, drain plug, and filter before anyone debates coverage.",
+        "start_ms": 29980,
+        "end_ms": 38163
       },
       {
         "index": 5,
         "speaker": "Patient",
-        "text": "No chest pain, but I would like to talk with a nurse.",
-        "start_ms": 25913,
-        "end_ms": 28925
+        "text": "Okay, please send the tow. I do not want to stay on the highway.",
+        "start_ms": 38561,
+        "end_ms": 42652
       }
     ],
-    "scenario_id": "medication_concern",
-    "audio_path": "data/generated_audio/medication_concern.wav"
+    "scenario_id": "oil_light_comeback",
+    "audio_path": "data/generated_audio/oil_light_comeback.wav"
   },
   {
-    "title": "Billing Confusion",
-    "patient": "Denise Walker",
-    "intent": "billing_confusion",
+    "title": "SOS Collision, No Response",
+    "patient": "Priya Nair",
+    "intent": "acn_emergency_dispatch",
+    "family": "Life-safety & crash",
+    "catalog_ids": [
+      "S1",
+      "S2",
+      "S3"
+    ],
+    "queue": "Safety Connect Response Center + 911",
+    "vehicle": "2024 Highlander, Safety Connect active",
+    "location": "GPS from Automatic Collision Notification",
+    "coverage": "Safety Connect subscription active; emergency contact on file",
     "segments": [
       {
         "index": 0,
         "speaker": "Agent",
-        "text": "Call Center, this is Ava. How can I help you today?",
+        "text": "Safety Connect emergency. We received an automatic collision notification from the vehicle. Occupants, can you hear me?",
         "start_ms": 800,
-        "end_ms": 4178
+        "end_ms": 8070
       },
       {
         "index": 1,
         "speaker": "Patient",
-        "text": "I got a bill I do not understand. If this is how it works, I am done with these visits.",
-        "start_ms": 4452,
-        "end_ms": 9685
+        "text": "There is no occupant response. I cannot hear anyone in the cabin.",
+        "start_ms": 8345,
+        "end_ms": 12035
       },
       {
         "index": 2,
         "speaker": "Agent",
-        "text": "I hear how frustrating that is. Let us separate the billing question from the care you still need.",
-        "start_ms": 10147,
-        "end_ms": 15112
+        "text": "I hear no occupant response. I am requesting emergency dispatch to the GPS location now. Stay on the line if anyone can hear me.",
+        "start_ms": 12498,
+        "end_ms": 20737
       },
       {
         "index": 3,
         "speaker": "Patient",
-        "text": "Nobody explained why I owe this much.",
-        "start_ms": 15394,
-        "end_ms": 17607
+        "text": "Help. We were rear-ended. My chest hurts. Please send an ambulance.",
+        "start_ms": 21019,
+        "end_ms": 25343
       },
       {
         "index": 4,
         "speaker": "Agent",
-        "text": "I can route the billing review and keep your care plan moving while that is checked.",
-        "start_ms": 18036,
-        "end_ms": 21851
+        "text": "Help is on the way. Stay in the vehicle with belts on unless there is fire. Do not try to leave live traffic. Are other occupants with you?",
+        "start_ms": 25772,
+        "end_ms": 33652
       },
       {
         "index": 5,
         "speaker": "Patient",
-        "text": "Okay, I just do not want to be surprised again.",
-        "start_ms": 22367,
-        "end_ms": 25494
+        "text": "My daughter is in the back. She is crying but she is awake.",
+        "start_ms": 34168,
+        "end_ms": 37446
       }
     ],
-    "scenario_id": "billing_confusion",
-    "audio_path": "data/generated_audio/billing_confusion.wav"
+    "scenario_id": "sos_acn_no_response",
+    "audio_path": "data/generated_audio/sos_acn_no_response.wav"
   },
   {
-    "title": "Symptom Escalation",
-    "patient": "James Miller",
-    "intent": "symptom_escalation",
-    "segments": [
-      {
-        "index": 0,
-        "speaker": "Agent",
-        "text": "Thank you for calling Call Center. Tell me what is going on today.",
-        "start_ms": 800,
-        "end_ms": 4528
-      },
-      {
-        "index": 1,
-        "speaker": "Patient",
-        "text": "My chest feels tight and I have been short of breath since this morning.",
-        "start_ms": 5085,
-        "end_ms": 8631
-      },
-      {
-        "index": 2,
-        "speaker": "Agent",
-        "text": "I am sorry you are feeling that. Because you mentioned chest tightness and shortness of breath, I need to escalate this right away.",
-        "start_ms": 9144,
-        "end_ms": 16211
-      },
-      {
-        "index": 3,
-        "speaker": "Patient",
-        "text": "I was hoping it would pass, but it is getting worse.",
-        "start_ms": 16653,
-        "end_ms": 19459
-      },
-      {
-        "index": 4,
-        "speaker": "Agent",
-        "text": "If symptoms are severe or worsening, please call emergency services now. I can also get a nurse on the line immediately.",
-        "start_ms": 20089,
-        "end_ms": 26982
-      },
-      {
-        "index": 5,
-        "speaker": "Patient",
-        "text": "Please get the nurse. I am scared.",
-        "start_ms": 27249,
-        "end_ms": 29302
-      }
-    ],
-    "scenario_id": "symptom_escalation",
-    "audio_path": "data/generated_audio/symptom_escalation.wav"
-  },
-  {
-    "title": "Care Navigation",
+    "title": "Hybrid No-Start",
     "patient": "Linda Chen",
-    "intent": "care_navigation",
+    "intent": "hybrid_12v_roadside",
+    "family": "Roadside & warning lights",
+    "catalog_ids": [
+      "R1",
+      "E1",
+      "E2",
+      "E10"
+    ],
+    "queue": "Toyota Roadside",
+    "vehicle": "2023 RAV4 Hybrid",
+    "location": "Parking garage, vehicle silent",
+    "coverage": "ToyotaCare roadside likely active; confirm VIN",
     "segments": [
       {
         "index": 0,
         "speaker": "Agent",
-        "text": "Call Center, this is Ava. What can I help with?",
+        "text": "Toyota roadside, this is Ava. How can I help?",
         "start_ms": 800,
-        "end_ms": 3864
+        "end_ms": 4108
       },
       {
         "index": 1,
         "speaker": "Patient",
-        "text": "I was discharged yesterday and I do not know who I am supposed to call next.",
-        "start_ms": 4458,
-        "end_ms": 8773
+        "text": "My RAV4 Hybrid will not start. There is no engine sound. I think the hybrid battery is dead.",
+        "start_ms": 4666,
+        "end_ms": 10347
       },
       {
         "index": 2,
         "speaker": "Agent",
-        "text": "I can help organize the next step. Do you have your discharge paperwork nearby?",
-        "start_ms": 9424,
-        "end_ms": 14180
+        "text": "A silent hybrid is often the small 12-volt battery, not the hybrid pack. Do you have dashboard lights, and will it go to READY?",
+        "start_ms": 10861,
+        "end_ms": 18462
       },
       {
         "index": 3,
         "speaker": "Patient",
-        "text": "Yes, but it is confusing.",
-        "start_ms": 14649,
-        "end_ms": 16419
+        "text": "The lights are dim and it will not go to READY.",
+        "start_ms": 18904,
+        "end_ms": 21029
       },
       {
         "index": 4,
         "speaker": "Agent",
-        "text": "No problem. We can confirm your follow-up appointment, medication questions, and who to call if symptoms change.",
-        "start_ms": 16936,
-        "end_ms": 23827
+        "text": "I can send a jump-start. If it will not hold, we will flatbed it to a Toyota dealer. Do not have a regular tow roll the drive wheels.",
+        "start_ms": 21659,
+        "end_ms": 29376
       },
       {
         "index": 5,
         "speaker": "Patient",
-        "text": "That would help a lot.",
-        "start_ms": 24304,
-        "end_ms": 25371
+        "text": "Please send someone. I am in a parking garage.",
+        "start_ms": 29643,
+        "end_ms": 32451
       }
     ],
-    "scenario_id": "care_navigation",
-    "audio_path": "data/generated_audio/care_navigation.wav"
+    "scenario_id": "hybrid_12v_nostart",
+    "audio_path": "data/generated_audio/hybrid_12v_nostart.wav"
+  },
+  {
+    "title": "Recall Drive Guidance",
+    "patient": "Robert Ellis",
+    "intent": "recall_campaign_guidance",
+    "family": "Warranty, recall & disputes",
+    "catalog_ids": [
+      "K1",
+      "K3",
+      "K4"
+    ],
+    "queue": "Brand Engagement Center, then dealer campaign",
+    "vehicle": "2021 RAV4, Toyota Safety Sense message on screen",
+    "location": "Home driveway, commuting question",
+    "coverage": "Open safety recall / service campaign pending VIN lookup",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Thank you for calling Toyota. I can help with recalls and campaigns.",
+        "start_ms": 800,
+        "end_ms": 4818
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "I got a letter about a safety recall. Can I still drive the car to work, or do I need to stop?",
+        "start_ms": 5412,
+        "end_ms": 11062
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "Let me check your VIN for open campaigns and the exact drive guidance. Do you have the VIN handy?",
+        "start_ms": 11713,
+        "end_ms": 17348
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "Yes. There is also a Toyota Safety Sense message on the screen.",
+        "start_ms": 17817,
+        "end_ms": 21781
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "If this campaign is not a stop-sale, you can drive to a Toyota dealer for the free repair. If it is a do-not-drive bulletin, we will arrange a tow and a loaner.",
+        "start_ms": 22298,
+        "end_ms": 31142
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Please tell me which one it is and help me get to a dealer.",
+        "start_ms": 31619,
+        "end_ms": 34450
+      }
+    ],
+    "scenario_id": "recall_drive_guidance",
+    "audio_path": "data/generated_audio/recall_drive_guidance.wav"
+  },
+  {
+    "title": "Warranty Dealer Dispute",
+    "patient": "Denise Walker",
+    "intent": "warranty_bec_liaison",
+    "family": "Warranty, recall & disputes",
+    "catalog_ids": [
+      "G1",
+      "G2",
+      "G8"
+    ],
+    "queue": "Brand Engagement Center",
+    "vehicle": "2022 Camry, 28,000 miles, transmission concern",
+    "location": "At home after a denied dealer repair",
+    "coverage": "Powertrain typically 5 years / 60,000 miles; diagnosis still required",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+        "start_ms": 800,
+        "end_ms": 4468
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "My dealer denied a warranty repair on the transmission. I am done with this dealer. I want Toyota to make this right.",
+        "start_ms": 4939,
+        "end_ms": 11619
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "I can open a case with your VIN, mileage, and dealer name, and work with the dealership on a resolution.",
+        "start_ms": 12246,
+        "end_ms": 18499
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "They said it was wear and tear. It is only 28,000 miles.",
+        "start_ms": 18972,
+        "end_ms": 22698
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "Powertrain coverage is typically five years or 60,000 miles, but we still need the diagnosis. I will stay with you as the liaison so you do not have to fight the store alone.",
+        "start_ms": 23221,
+        "end_ms": 33519
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Thank you. I just want someone to own this. If this is a lemon I want a buyback.",
+        "start_ms": 34101,
+        "end_ms": 38944
+      }
+    ],
+    "scenario_id": "warranty_dealer_dispute",
+    "audio_path": "data/generated_audio/warranty_dealer_dispute.wav"
+  },
+  {
+    "title": "Safety Connect Trial Expired",
+    "patient": "Chris Alvarez",
+    "intent": "safety_connect_restore",
+    "family": "Connected services & privacy",
+    "catalog_ids": [
+      "N2",
+      "S7"
+    ],
+    "queue": "Brand Engagement Center connected-services",
+    "vehicle": "2023 Corolla, SOS lights off",
+    "location": "At home, worried about tonight's highway trip",
+    "coverage": "Safety Connect trial expired; roadside 1-800-444-4195 still available",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+        "start_ms": 800,
+        "end_ms": 4468
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "My SOS button does not work. Both lights are off. I thought Safety Connect was included with the car.",
+        "start_ms": 4900,
+        "end_ms": 10906
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "Both lights off usually means the trial or subscription is inactive. Green is active. I can help you re-enroll in the Toyota app.",
+        "start_ms": 11565,
+        "end_ms": 18755
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "What if I need help on the highway tonight?",
+        "start_ms": 19395,
+        "end_ms": 21534
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "You can still use roadside at 1-800-444-4195 or the Toyota app 24/7 button. SOS with GPS dispatch needs an active Safety Connect trial or paid subscription.",
+        "start_ms": 22170,
+        "end_ms": 35491
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Please restore Safety Connect. I do not want to be without SOS.",
+        "start_ms": 35871,
+        "end_ms": 39758
+      }
+    ],
+    "scenario_id": "safety_connect_expired",
+    "audio_path": "data/generated_audio/safety_connect_expired.wav"
+  },
+  {
+    "title": "Accidental SOS vs Destination Assist",
+    "patient": "Hannah Brooks",
+    "intent": "accidental_sos_reroute",
+    "family": "Life-safety & crash",
+    "catalog_ids": [
+      "S6",
+      "N9"
+    ],
+    "queue": "Safety Connect, then Destination Assist",
+    "vehicle": "2024 Grand Highlander, Drive Connect trial active",
+    "location": "Parked in a shopping-center lot, occupants answering",
+    "coverage": "Safety Connect and Drive Connect trials active",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Safety Connect emergency. Is anyone hurt?",
+        "start_ms": 800,
+        "end_ms": 3542
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "No, I am fine. I did not mean to hit the SOS button. I meant to call Destination Assist. I just need a restaurant near me.",
+        "start_ms": 3814,
+        "end_ms": 12076
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "I am glad you are safe. This SOS line is for emergencies. I will confirm there is no crash, then we will get Destination Assist on the correct channel.",
+        "start_ms": 12480,
+        "end_ms": 21486
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "Sorry. Can you just send the restaurant into my navigation from here?",
+        "start_ms": 21845,
+        "end_ms": 25795
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "I will not keep an emergency line for a restaurant. I can transfer you to Destination Assist, or you can say Call Destination Assist from the nav menu.",
+        "start_ms": 26284,
+        "end_ms": 35057
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Okay, please transfer me. I did not mean to clog the emergency line.",
+        "start_ms": 35355,
+        "end_ms": 39946
+      }
+    ],
+    "scenario_id": "accidental_sos_dest_assist",
+    "audio_path": "data/generated_audio/accidental_sos_dest_assist.wav"
+  },
+  {
+    "title": "Post-Collision Repair Guidance",
+    "patient": "Marcus Hale",
+    "intent": "collision_tccc_guidance",
+    "family": "Collision repair",
+    "catalog_ids": [
+      "P1",
+      "P2",
+      "P3"
+    ],
+    "queue": "Brand Engagement Center + Toyota Certified Collision Center locator",
+    "vehicle": "2022 Camry, airbags did not deploy, bumper and windshield damage",
+    "location": "At home the day after a crash; vehicle drivable",
+    "coverage": "Insurance claim open; Genuine parts and ADAS calibration at issue",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Toyota Brand Engagement, how can I help?",
+        "start_ms": 800,
+        "end_ms": 3528
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "I was in a crash yesterday. The insurance shop wants aftermarket parts. Where should I take the car?",
+        "start_ms": 3938,
+        "end_ms": 9878
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "You can choose a Toyota Certified Collision Center. That matters for airbags and Safety Sense calibration after bumper or windshield work.",
+        "start_ms": 10522,
+        "end_ms": 18351
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "The insurer said I have to use their shop.",
+        "start_ms": 18718,
+        "end_ms": 20911
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "You generally choose the repair facility. I can locate a Toyota Certified Collision Center and note Genuine parts plus ADAS recalibration on the file.",
+        "start_ms": 21414,
+        "end_ms": 30254
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Yes, please find a certified center near me. I do not want the radar to be wrong.",
+        "start_ms": 30636,
+        "end_ms": 35738
+      }
+    ],
+    "scenario_id": "post_collision_tccc",
+    "audio_path": "data/generated_audio/post_collision_tccc.wav"
+  },
+  {
+    "title": "Service Connect Dealer Opt-Out",
+    "patient": "Elena Rossi",
+    "intent": "service_connect_privacy_optout",
+    "family": "Connected services & privacy",
+    "catalog_ids": [
+      "N6",
+      "N7",
+      "N11"
+    ],
+    "queue": "Brand Engagement Center privacy / connected services",
+    "vehicle": "2023 Highlander enrolled in Service Connect",
+    "location": "At home, receiving repeated dealer calls and texts",
+    "coverage": "Service Connect dealer contact is opt-in; can be stopped in app or by BEC",
+    "segments": [
+      {
+        "index": 0,
+        "speaker": "Agent",
+        "text": "Toyota Brand Engagement, this is Ava. How can I help?",
+        "start_ms": 800,
+        "end_ms": 4468
+      },
+      {
+        "index": 1,
+        "speaker": "Patient",
+        "text": "The dealer keeps calling me because of a Service Connect alert. I never asked for that. I want it stopped.",
+        "start_ms": 4953,
+        "end_ms": 10932
+      },
+      {
+        "index": 2,
+        "speaker": "Agent",
+        "text": "Dealer contact from Service Connect is opt-in. I can help you turn off dealer notifications in the Toyota app privacy settings, or I can take the request here.",
+        "start_ms": 11508,
+        "end_ms": 20799
+      },
+      {
+        "index": 3,
+        "speaker": "Patient",
+        "text": "I also do not want Toyota tracking my location. Please opt me out today.",
+        "start_ms": 21359,
+        "end_ms": 26139
+      },
+      {
+        "index": 4,
+        "speaker": "Agent",
+        "text": "I will process the dealer opt-out and explain what Safety Connect, Service Connect, and Remote Connect collect. Law-enforcement location requests still follow legal process.",
+        "start_ms": 26796,
+        "end_ms": 37055
+      },
+      {
+        "index": 5,
+        "speaker": "Patient",
+        "text": "Thank you. Reply STOP did not work on the texts, so I called.",
+        "start_ms": 37556,
+        "end_ms": 41958
+      }
+    ],
+    "scenario_id": "service_connect_optout",
+    "audio_path": "data/generated_audio/service_connect_optout.wav"
   }
 ]

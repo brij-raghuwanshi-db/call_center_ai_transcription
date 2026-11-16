@@ -145,16 +145,24 @@ def _latest_created_at(segments: list[TranscriptSegment]) -> datetime:
 
 
 def _call_row(call: ActiveCall) -> ActiveCallTable:
+    from .toyota_catalog import scenario_by_id
+
+    scenario = scenario_by_id(call.scenario_id)
     return ActiveCallTable(
         call_id=call.call_id,
         status=_value(call.status),
         scenario_id=call.scenario_id,
         scenario_title=call.scenario_title,
+        family=scenario.family,
+        queue=scenario.queue,
+        vehicle=scenario.vehicle,
+        location=scenario.location,
+        coverage=scenario.coverage,
         patient_name=call.patient_name,
         latest_transcript=call.latest_transcript,
+        current_recommendation_id=call.current_recommendation_id,
         latest_intent=call.latest_intent,
         current_risk_level=_value(call.current_risk_level),
-        current_recommendation_id=call.current_recommendation_id,
         started_at=call.started_at,
         ended_at=call.ended_at,
     )
